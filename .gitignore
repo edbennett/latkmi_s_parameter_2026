@@ -1,0 +1,7 @@
+data
+.snakemake
+metadata
+assets/
+tmp
+processed_data
+__pycache__

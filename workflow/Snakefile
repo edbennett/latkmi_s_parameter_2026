@@ -1,0 +1,15 @@
+import pandas as pd
+
+configfile: "config/config.yaml"
+
+metadata = pd.read_csv(config["metadata_file"], comment="#")
+metadata_query = "Nf == {Nf} and Nt == {Nt} and Nx == {Nx} and Ny == {Ny} and Nz == {Nz} and mf == {mf}"
+subdir_format = "nf{Nf}/mf{mf}/{Nx}x{Ny}x{Nz}x{Nt}"
+
+def get_metadata(column):
+    def get_metadata_inner(wildcards):
+        return lookup(within=metadata, query=metadata_query.format(**wildcards), cols=column)
+
+    return get_metadata_inner
+
+include: "rules/vp-momentum.smk"
