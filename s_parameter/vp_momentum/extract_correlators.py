@@ -28,7 +28,6 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
 
     reading_header_block = False
     reading_data_block = False
-    momentum_units = None
 
     for line in file_object:
         if line.startswith("start trajectory "):
@@ -37,6 +36,7 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
         if line.startswith("SOURCE:"):
             if line.split()[1] in target_sources:
                 reading_header_block = True
+
         if line.startswith("MASSES:"):
             current_mass = float(line.split()[1])
             if mass is not None:
@@ -58,7 +58,10 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
                     data[trajectory_index].append({"_source_position": source_position})
 
             if line.startswith("MOMENTUM_UNITS"):
-                momentum_units = list(map(float, line.split()[1:]))
+                raise ValueError(
+                    "Momentum correlators are not supported here, "
+                    "use extract_momentum_correlators instead"
+                )
 
             if line.startswith("SINKS:") or line.startswith("SINK:"):
                 sinks = line.split()[1:]
@@ -66,24 +69,13 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
                     reading_data_block = True
                     reading_header_block = False
                     slice_count = 0
-                    if momentum_units:
-                        datum = {
-                            sink: {
-                                "direction": [],
-                                "momentum_units": momentum_units,
-                                "data": [[] for _ in momentum_units],
-                            }
-                            for sink in sinks
-                        }
-                    else:
-                        datum = {sink: [] for sink in sinks}
+                    datum = {sink: [] for sink in sinks}
                     continue
 
         if reading_data_block:
             if line.startswith("END"):
                 reading_header_block = False
                 reading_data_block = False
-                momentum_units = None
                 data[trajectory_index][-1].update(datum)
                 continue
             if line.startswith("SINK:"):
@@ -93,34 +85,21 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
                 if sink not in target_sinks:
                     reading_data_block = False
                     reading_header_block = True
-                    momentum_units = None
                 else:
                     slice_count = 0
                     datum = {sink: []}
                 continue
 
             split_line = line.split()
-            if not momentum_units:
-                assert int(split_line[0]) == slice_count
+            assert int(split_line[0]) == slice_count
 
             if sinks == ["1LPBP"] and slice_count > 0:
-                raise ValueError(f"t=${slice_count} not expected for 1LPBP channel")
+                raise ValueError(f"t={slice_count} not expected for 1LPBP channel")
 
             slice_count += 1
 
             for sink_index, sink in enumerate(sinks):
-                if momentum_units:
-                    split_line = line.split()
-                    datum[sink]["direction"].append(list(map(int, split_line[:4])))
-                    for momentum_index, momentum in enumerate(momentum_units):
-                        index_within_line = 4 + 2 * (
-                            sink_index * len(momentum_units) + momentum_index
-                        )
-                        datum[sink]["data"][momentum_index].append(
-                            float(split_line[index_within_line])
-                        )
-                else:
-                    datum[sink].append(float(split_line[sink_index * 2 + 1]))
+                datum[sink].append(float(split_line[sink_index * 2 + 1]))
 
     return {
         "data": data,

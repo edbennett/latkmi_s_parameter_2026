@@ -1,2 +1,5 @@
 metadata_file: metadata/ensembles.csv
 plot_styles: styles/prd.mplstyle
+vpf_plot_upper_bounds:
+  heavy: 1.1
+  light: 0.29

@@ -2,15 +2,49 @@
 Tools for binning and jackknife analysis.
 """
 
+from math import prod
+
 
 def jackknife_mean_variance(samples):
     """
-    Given a set of jackknife samples,
+    Given a set of jackknife samples
+    (sampled along axis 0, with other axes free),
     compute the mean and standard deviation of the underlying data.
     """
     mean = samples.mean(axis=0)
     variance = (len(samples) - 1) / len(samples) * ((samples - mean) ** 2).sum(axis=0)
     return mean, variance**0.5
+
+
+def sample_jackknife(data, free_axes=-1):
+    """
+    Compute jackknife samples of data,
+    for which specified axes are left free (e.g. a correlation function),
+    and the first axis is the statistical samples over which to jackknife
+    (e.g. Monte Carlo samples).
+    Intermediary axes are quasi-independent observations of the same quantity.
+
+    See e.g. https://en.wikipedia.org/wiki/Jackknife_resampling
+    """
+
+    num_axes = len(data.shape)
+    if isinstance(free_axes, int):
+        free_axes = [free_axes]
+    if any(axis >= num_axes or axis <= -num_axes for axis in free_axes):
+        raise ValueError(f"Invalid axes {free_axes}")
+
+    normalised_free_axes = [axis % num_axes for axis in free_axes]
+
+    sample_axis = 0
+    full_axes = tuple(
+        axis for axis in range(num_axes) if axis not in normalised_free_axes
+    )
+    observation_axes = tuple(axis for axis in full_axes if axis != sample_axis)
+    observation_count = prod([data.shape[axis] for axis in full_axes])
+
+    return (
+        data.sum(axis=full_axes) - data.sum(axis=observation_axes)
+    ) / observation_count
 
 
 def sample_jackknife_ratio(numerator, denominator):
@@ -19,12 +53,7 @@ def sample_jackknife_ratio(numerator, denominator):
     compute the jackknife samples for their ratio.
     """
     assert numerator.shape == denominator.shape
-    full_axes = tuple(range(len(numerator.shape) - 1))
-    jackknife_axes = tuple(range(1, len(numerator.shape) - 1))
-    samples = (numerator.sum(axis=full_axes) - numerator.sum(axis=jackknife_axes)) / (
-        denominator.sum(axis=full_axes) - denominator.sum(axis=jackknife_axes)
-    )
-    return samples
+    return sample_jackknife(numerator) / sample_jackknife(denominator)
 
 
 def bin_data(data, bin_size):

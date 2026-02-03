@@ -9,12 +9,21 @@ import json
 import numpy as np
 
 
-def serialise_value(value):
+def _serialise_value(value):
+    """
+    Helper function for dump_numpy:
+    convert Numpy arrays to lists,
+    and recurse into other data structures to find them.
+    """
     match value:
         case np.ndarray():
             return value.tolist()
         case tuple():
-            return list(map(serialise_value, value))
+            return list(map(_serialise_value, value))
+        case dict():
+            return {
+                key: _serialise_value(inner_value) for key, inner_value in value.items()
+            }
         case _:
             return value
 
@@ -25,9 +34,34 @@ def dump_numpy(data, file_object):
     Serialise them as nested lists.
     """
     json.dump(
-        {key: serialise_value(value) for key, value in data.items()},
+        {key: _serialise_value(value) for key, value in data.items()},
         file_object,
     )
+
+
+def to_numpy_recursive(data):
+    """
+    Given a nested dict,
+    find any lists and turn them into Numpy arrays.
+    """
+    result = {}
+    for key, value in data.items():
+        match value:
+            case list():
+                result[key] = np.array(value)
+            case dict():
+                result[key] = to_numpy_recursive(value)
+            case _:
+                result[key] = value
+
+    return result
+
+
+def convert_types(items):
+    return {
+        int(k) if k.isdigit() else k: np.array(v) if isinstance(v, list) else v
+        for k, v in items
+    }
 
 
 def read_Z_A(filename):

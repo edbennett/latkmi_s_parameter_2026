@@ -13,3 +13,12 @@ def get_metadata(column):
     return get_metadata_inner
 
 include: "rules/vp-momentum.smk"
+
+
+rule copy_ensemble_plot:
+    input:
+        f"processed_data/{subdir_format}/{{filename}}.{{extension}}",
+    output:
+        "assets/plots/{filename}_Nf{Nf}_mf{mf}_{Nx}x{Ny}x{Nz}x{Nt}.{extension}",
+    shell:
+        "cp {input} {output}"
