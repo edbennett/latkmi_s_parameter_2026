@@ -32,7 +32,7 @@ def max_q(length):
 
 def get_s_parameter(param_samples):
     b0, b1, c1, _ = param_samples.T
-    s_parameter_samples = b1 - b0 * c1
+    s_parameter_samples = (b1 - b0 * c1) * 2 * np.pi
     return jackknife_mean_variance(s_parameter_samples)
 
 
