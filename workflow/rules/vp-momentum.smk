@@ -109,6 +109,22 @@ rule Z_A:
         "--tmin {params.plateau_start} --tmax {params.plateau_end}"
 
 
+rule single_Z_A_eff_plot:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.Z_A.output.data,
+        script="s_parameter/vp_momentum/plot_Z_A.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot=f"processed_data/{subdir_format}/Z_A_eff.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
 rule Z_A_eff_plot:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
