@@ -6,6 +6,7 @@ following the prescription in Section 2 of the paper.
 """
 
 from argparse import ArgumentParser, FileType
+from compression import zstd
 from functools import partial
 import itertools
 import json
@@ -183,7 +184,7 @@ def get_vpf(data, bin_size=1):
 
 def main():
     args = get_args()
-    with open(args.input_file, "r") as input_file:
+    with zstd.open(args.input_file, "rt") as input_file:
         full_data = json.load(input_file, object_pairs_hook=convert_types)
 
     result = get_vpf(full_data["data"], args.bin_size)

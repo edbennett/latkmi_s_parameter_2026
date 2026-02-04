@@ -4,17 +4,18 @@
 Extract momentum correlators and PBP from a full log.
 """
 
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 from compression import zstd
 from collections import defaultdict
 import re
 import json
+import sys
 
 
 def get_args():
     parser = ArgumentParser()
     parser.add_argument("input_filename")
-    parser.add_argument("--output_file", type=FileType("w"), default="-")
+    parser.add_argument("--output_file", default=None)
     parser.add_argument("--use_complex", action="store_true")
     parser.add_argument("--Nt", type=int, default=None)
     parser.add_argument("--Nx", type=int, default=None)
@@ -195,7 +196,12 @@ def main():
 
     # TODO: Check consistency between correlator length and given Nt
     data.update({"Nt": args.Nt, "Nx": args.Nx, "Ny": args.Ny, "Nz": args.Nz})
-    json.dump(data, args.output_file)
+
+    if args.output_file is None:
+        json.dump(data, sys.stdout)
+    else:
+        with zstd.open(args.output_file, "wt") as output_file:
+            json.dump(data, output_file)
 
 
 if __name__ == "__main__":
