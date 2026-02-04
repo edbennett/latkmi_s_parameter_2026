@@ -324,3 +324,24 @@ rule plot_VPF_multiple:
         "python -m {params.module} {input.data} {params.fit_result_flags} "
         "--plot_styles {input.plot_styles} --output_file {output.plot} "
         "--q_squared_upper_bound {params.q_squared_upper_bound}"
+
+
+rule plot_S_parameter:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data={
+            f"processed_data/{subdir_format}/renormalised_pade_fit.json".format(
+                **metadatum
+            )
+            for metadatum in metadata.to_dict(orient="records")
+        },
+        script="s_parameter/vp_momentum/plot_s_parameter.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/S_parameter_mf.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
