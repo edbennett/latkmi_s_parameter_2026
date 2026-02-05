@@ -13,7 +13,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from ..io import dump_numpy, convert_types
-from .pade import pade
+from .pade import pade, get_momentum_filter
 from ..stats import jackknife_mean_variance
 
 
@@ -67,12 +67,9 @@ def fit_samples_pade(momentum_squared, vpf_samples):
 
 def fit_pade(data, key="renormalised_vpf_samples"):
     momentum = data["reordered_momentum"] * data["momentum_units"]
-    momentum_filter = (
-        (momentum[:, 0] <= max_q(data["Nx"]))
-        & (momentum[:, 1] <= max_q(data["Ny"]))
-        & (momentum[:, 2] <= max_q(data["Nz"]))
-        & (momentum[:, 3] <= max_q(data["Nt"]))
-        & (data["momentum_squared"] < 1)
+    momentum_filter = get_momentum_filter(
+        momentum,
+        [data[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
     )
     filtered_momentum_squared = data["momentum_squared"][momentum_filter]
     result = {

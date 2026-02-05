@@ -8,7 +8,7 @@ import numpy as np
 
 from ..io import to_numpy_recursive
 from ..plot import save_or_show
-from .pade import pade
+from .pade import pade, get_momentum_filter
 
 
 colours = {"Conserved": "C0", "OneLink": "C1"}
@@ -70,13 +70,17 @@ def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
             "OneLink": "$OneLink--OneLink",
         },
     }
+    momentum_filter = get_momentum_filter(
+        data["momentum"],
+        [data[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
+    )
 
     for current, marker in [("Conserved", "o"), ("OneLink", "s")]:
         vpf = data[key][current]
         ax.errorbar(
-            data["momentum_squared"],
-            vpf[0],
-            yerr=vpf[1],
+            data["momentum_squared"][momentum_filter],
+            vpf[0][momentum_filter],
+            yerr=vpf[1][momentum_filter],
             linestyle="none",
             marker=marker,
             label=labels[renormalised][current],

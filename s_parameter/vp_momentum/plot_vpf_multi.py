@@ -6,6 +6,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from ..plot import save_or_show
+from .pade import get_momentum_filter
 from .plot_vpf import read, plot_fit_result
 
 
@@ -44,11 +45,15 @@ class Props:
 
 def plot_single_datum(ax, datum, props):
     colour, marker, label = props.get(datum)
+    momentum_filter = get_momentum_filter(
+        datum["reordered_momentum"],
+        [datum[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
+    )
     vpf = datum["renormalised_vpf"]["Conserved"]
     ax.errorbar(
-        datum["momentum_squared"],
-        vpf[0],
-        yerr=vpf[1],
+        datum["momentum_squared"][momentum_filter],
+        vpf[0][momentum_filter],
+        yerr=vpf[1][momentum_filter],
         linestyle="none",
         marker=marker,
         label=label,
