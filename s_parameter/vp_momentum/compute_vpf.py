@@ -69,16 +69,13 @@ def project(data):
 
         # mu: sink  direction; nu: source direction
         for mu, nu in itertools.product(range(4), range(4)):
-            momentum_factor = (
-                unique_momentum[:, mu]
-                * unique_momentum[:, nu]
-                / unique_momentum_squared
-            )
+            momentum_factor = momentum[:, mu] * momentum[:, nu] / momentum_squared
             pi_b = (
                 np.add.reduceat(
-                    source_data[nu][mu][:, sort_index], momentum_groups, axis=1
+                    (source_data[nu][mu] * momentum_factor)[:, sort_index],
+                    momentum_groups,
+                    axis=1,
                 )
-                * momentum_factor
                 / momentum_group_count
             )
             dest_data["PiB"] += pi_b
@@ -88,7 +85,12 @@ def project(data):
                 if mu == nu:
                     source_pbp = data["1LPBP"][source_position_index][:, mu]
                     dest_data["PiB_subtracted"] += (
-                        source_pbp[:, np.newaxis] * momentum_factor
+                        np.add.reduceat(
+                            source_pbp[:, np.newaxis] * momentum_factor,
+                            momentum_groups,
+                            axis=1,
+                        )
+                        / momentum_group_count
                     )
 
         # Trace
