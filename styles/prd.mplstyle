@@ -5,7 +5,7 @@ font.serif : Times New Roman
 text.latex.preamble : \usepackage{mathptmx} \DeclareFontFamily{U}{cal}{} \DeclareFontShape{U}{cal}{m}{n}{<->cmsy10}{} \DeclareSymbolFont{rcal}{U}{cal}{m}{n} \DeclareSymbolFontAlphabet{\mathcal}{rcal}
 
 lines.linewidth : 0.5
-lines.markersize : 2
+lines.markersize : 4
 lines.markeredgewidth : 0.5
 
 errorbar.capsize : 2.0
