@@ -22,6 +22,7 @@ def get_args():
     parser.add_argument("input_file")
     parser.add_argument("--output_file", type=FileType("w"), default="-")
     parser.add_argument("--renormalised", action="store_true")
+    parser.add_argument("--upper_bound", choices=["1", "max2", "max3", "final"])
     return parser.parse_args()
 
 
@@ -65,11 +66,11 @@ def fit_samples_pade(momentum_squared, vpf_samples):
     }
 
 
-def fit_pade(data, key="renormalised_vpf_samples"):
-    momentum = data["reordered_momentum"] * data["momentum_units"]
+def fit_pade(data, key="renormalised_vpf_samples", momentum_squared_upper_bound=1):
     momentum_filter = get_momentum_filter(
-        momentum,
+        data["reordered_momentum"],
         [data[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
+        momentum_squared_upper_bound,
     )
     filtered_momentum_squared = data["momentum_squared"][momentum_filter]
     result = {
@@ -82,17 +83,37 @@ def fit_pade(data, key="renormalised_vpf_samples"):
     return result
 
 
+def get_upper_bound(data, key):
+    """
+    Implements Eq. (B3) of the paper.
+    """
+    Nt, Nx, Ny, Nz = data["Nt"], data["Nx"], data["Ny"], data["Nz"]
+    assert Nx == Ny and Nx == Nz
+    common_factor = 3 * (2 * np.pi / Nx) ** 2 + (2 * np.pi / Nt) ** 2
+    q_max2 = 2**2 * common_factor
+    q_max3 = 3**2 * common_factor
+
+    return {
+        "1": 1,
+        "max2": q_max2,
+        "max3": q_max3,
+        "final": min(1, q_max2),
+    }[key]
+
+
 def main():
     args = get_args()
     with open(args.input_file, "r") as input_file:
         data = json.load(input_file, object_pairs_hook=convert_types)
 
     keys = {True: "renormalised_vpf_samples", False: "vpf_samples"}
-    result = fit_pade(data, keys[args.renormalised])
+    fit_upper_bound = get_upper_bound(data, args.upper_bound)
+    result = fit_pade(data, keys[args.renormalised], fit_upper_bound)
 
     dump_numpy(
         {
             "pade_fit_result": result,
+            "upper_bound": args.upper_bound,
             **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz"]},
         },
         args.output_file,

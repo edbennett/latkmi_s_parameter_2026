@@ -33,7 +33,7 @@ def read(input_filename):
 
 
 def plot_fit_result(
-    ax, fit_results, colour=None, target_currents=["Conserved", "OneLink"]
+    ax, fit_results, colour=None, target_currents=["Conserved", "OneLink"], Z_A=1
 ):
     xmin, xmax = ax.get_xlim()
     x_range = np.linspace(
@@ -46,7 +46,7 @@ def plot_fit_result(
             continue
         ax.plot(
             x_range,
-            pade(x_range, *result["params"][0]),
+            pade(x_range, *result["params"][0]) * Z_A,
             color=colour if colour else colours[current],
         )
     ax.set_xlim(xmin, xmax)
@@ -71,7 +71,7 @@ def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
         },
     }
     momentum_filter = get_momentum_filter(
-        data["momentum"],
+        data["reordered_momentum"],
         [data[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
     )
 
