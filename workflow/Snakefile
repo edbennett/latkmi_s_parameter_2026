@@ -15,6 +15,15 @@ def get_metadata(column):
 include: "rules/vp-momentum.smk"
 
 
+rule all:
+    input:
+        vp_momentum_plots=expand(
+            "assets/plots/{plot_name}.pdf",
+            plot_name=["Z_A_eff", "Z_A_fit", "vpf_light_ensembles", "vpf_heavy_ensembles", "S_parameter_mf", "vpf_Nf8_mf0.015_42x42x42x56", "renormalised_vpf_Nf8_mf0.015_42x42x42x56"]
+        ),
+    default_target: True
+
+
 rule copy_ensemble_plot:
     input:
         f"processed_data/{subdir_format}/{{filename}}.{{extension}}",
