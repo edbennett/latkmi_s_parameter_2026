@@ -34,7 +34,8 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
             trajectory_index = int(line.split()[2])
             data[trajectory_index] = []
         if line.startswith("SOURCE:"):
-            if line.split()[1] in target_sources:
+            source = line.split()[1]
+            if (not target_sources) or (source in target_sources):
                 reading_header_block = True
 
         if line.startswith("MASSES:"):
@@ -54,14 +55,11 @@ def read_data(file_object, target_sinks, target_sources, use_complex=False):
                     not data
                     or not data[trajectory_index]
                     or data[trajectory_index][-1]["_source_position"] != source_position
+                    or data[trajectory_index][-1]["_source"] != source
                 ):
-                    data[trajectory_index].append({"_source_position": source_position})
-
-            if line.startswith("MOMENTUM_UNITS"):
-                raise ValueError(
-                    "Momentum correlators are not supported here, "
-                    "use extract_momentum_correlators instead"
-                )
+                    data[trajectory_index].append(
+                        {"_source_position": source_position, "_source": source}
+                    )
 
             if line.startswith("SINKS:") or line.startswith("SINK:"):
                 sinks = line.split()[1:]
