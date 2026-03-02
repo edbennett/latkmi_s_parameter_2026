@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-import json
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..io import to_numpy_recursive
+from ..io import read_numpy, read_numpy_optional
 from ..plot import save_or_show
 from .pade import pade, get_momentum_filter
 
@@ -23,13 +22,6 @@ def get_args():
     parser.add_argument("--renormalised", action="store_true")
     parser.add_argument("--q_squared_upper_bound", type=float, default=None)
     return parser.parse_args()
-
-
-def read(input_filename):
-    with open(input_filename, "r") as file_object:
-        data = json.load(file_object)
-
-    return to_numpy_recursive(data)
 
 
 def plot_fit_result(
@@ -109,11 +101,8 @@ def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
-    data = read(args.input_file)
-    if args.fit_result:
-        fit_result = read(args.fit_result)
-    else:
-        fit_result = None
+    data = read_numpy(args.input_file)
+    fit_result = read_numpy_optional(args.fit_result)
 
     fig = plot(data, args.renormalised, args.q_squared_upper_bound, fit_result)
     save_or_show(fig, args.output_file)

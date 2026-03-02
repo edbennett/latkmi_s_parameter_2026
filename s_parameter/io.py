@@ -24,6 +24,8 @@ def _serialise_value(value):
             return {
                 key: _serialise_value(inner_value) for key, inner_value in value.items()
             }
+        case list():
+            return list(map(_serialise_value, value))
         case _:
             return value
 
@@ -62,6 +64,19 @@ def convert_types(items):
         int(k) if k.isdigit() else k: np.array(v) if isinstance(v, list) else v
         for k, v in items
     }
+
+
+def read_numpy(input_filename):
+    with open(input_filename, "r") as file_object:
+        data = json.load(file_object)
+
+    return to_numpy_recursive(data)
+
+
+def read_numpy_optional(filename):
+    if filename is None:
+        return None
+    return read_numpy(filename)
 
 
 def read_Z_A(filename):

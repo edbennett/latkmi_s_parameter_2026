@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..plot import save_or_show
+from ..io import read_numpy_optional
 from .pade import get_momentum_filter
 from .plot_vpf import read, plot_fit_result
 
@@ -93,18 +94,12 @@ def plot(data=[], fit_results=[], Z_A=None, q_squared_upper_bound=None):
     return fig
 
 
-def get_Z_A(filename):
-    if filename is None:
-        return None
-    return read(filename)
-
-
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
     data = [read(input_file) for input_file in args.input_files]
     fit_results = [read(fit_result) for fit_result in args.fit_results]
-    Z_A = get_Z_A(args.Z_A)
+    Z_A = read_numpy_optional(args.Z_A)
 
     fig = plot(
         data,

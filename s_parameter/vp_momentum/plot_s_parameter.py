@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..plot import save_or_show
-from .plot_vpf import read
+from ..io import read_numpy, read_numpy_optional
 
 
 colours_markers = {
@@ -114,8 +114,8 @@ def plot(data, Z_A):
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
-    data = [read(filename) for filename in args.input_files]
-    Z_A = read(args.Z_A) if args.Z_A else None
+    data = [read_numpy(filename) for filename in args.input_files]
+    Z_A = read_numpy_optional(args.Z_A)
 
     fig = plot(data, Z_A["central"]["Z_A_0"] if Z_A else (1, 0))
     save_or_show(fig, args.output_file)
