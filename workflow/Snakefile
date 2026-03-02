@@ -15,6 +15,7 @@ def get_metadata(column, from_df=metadata):
 include: "rules/za.smk"
 include: "rules/vp-momentum.smk"
 include: "rules/time-moment.smk"
+include: "rules/comparison.smk"
 
 
 rule all:
@@ -30,6 +31,7 @@ rule all:
                 "vpf_Nf8_mf0.015_42x42x42x56",
                 "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
                 "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
+                "S_tm_vp_comparison",
             ]
         ),
     default_target: True
