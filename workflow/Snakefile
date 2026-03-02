@@ -18,22 +18,33 @@ include: "rules/time-moment.smk"
 include: "rules/comparison.smk"
 
 
+vp_momentum_plots = [
+    "Z_A_eff",
+    "Z_A_fit",
+    "vpf_light_ensembles",
+    "vpf_heavy_ensembles",
+    "S_parameter_mf",
+    "vpf_Nf8_mf0.015_42x42x42x56",
+    "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
+]
+time_moment_plots = [
+    "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
+]
+comparison_plots = [
+    "S_tm_vp_comparison",
+]
+tables = [
+    "S_parameter",
+]
+
 rule all:
     input:
-        vp_momentum_plots=expand(
-            "assets/plots/{plot_name}.pdf",
-            plot_name=[
-                "Z_A_eff",
-                "Z_A_fit",
-                "vpf_light_ensembles",
-                "vpf_heavy_ensembles",
-                "S_parameter_mf",
-                "vpf_Nf8_mf0.015_42x42x42x56",
-                "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
-                "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
-                "S_tm_vp_comparison",
-            ]
+        plots=expand(
+            "assets/plots/{plot_name}.pdf", plot_name=(
+                vp_momentum_plots + time_moment_plots + comparison_plots
+            ),
         ),
+        tables=expand("assets/tables/{table_name}.tex", table_name=tables),
     default_target: True
 
 
