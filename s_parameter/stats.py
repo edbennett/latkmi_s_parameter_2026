@@ -3,6 +3,7 @@ Tools for binning and jackknife analysis.
 """
 
 from math import prod
+import numpy as np
 
 
 def jackknife_mean_variance(samples):
@@ -11,9 +12,35 @@ def jackknife_mean_variance(samples):
     (sampled along axis 0, with other axes free),
     compute the mean and standard deviation of the underlying data.
     """
-    mean = samples.mean(axis=0)
+    mean = np.mean(samples, axis=0)
     variance = (len(samples) - 1) / len(samples) * ((samples - mean) ** 2).sum(axis=0)
     return mean, variance**0.5
+
+
+def sample_systematics(func, min_timeslice, max_timeslice):
+    fit_samples = []
+    for start_timeslice in range(min_timeslice, max_timeslice - 3):
+        for end_timeslice in range(start_timeslice + 4, max_timeslice + 1):
+            try:
+                fit_samples.append(func(start_timeslice, end_timeslice))
+            except RuntimeError:
+                # Not all fits work, and that's OK
+                continue
+
+    return fit_samples
+
+
+def jackknife_systematic_error(samples, result, method="max_deviation"):
+    """
+    Given a set of samples of a quantity estimated with different systematics
+    (sampled along axis 0, with other axes free),
+    and the final central value estimate,
+    compute an estimate of the systematic error.
+    """
+    if method != "max_deviation":
+        raise NotImplementedError(f"{method} not currently implemented")
+
+    return np.abs(samples - result).max(axis=0)
 
 
 def sample_jackknife(data, free_axes=-1):

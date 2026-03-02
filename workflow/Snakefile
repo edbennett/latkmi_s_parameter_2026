@@ -6,21 +6,31 @@ metadata = pd.read_csv(config["metadata_file"], comment="#")
 metadata_query = "Nf == {Nf} and Nt == {Nt} and Nx == {Nx} and Ny == {Ny} and Nz == {Nz} and mf == {mf}"
 subdir_format = "nf{Nf}/mf{mf}/{Nx}x{Ny}x{Nz}x{Nt}"
 
-def get_metadata(column):
+def get_metadata(column, from_df=metadata):
     def get_metadata_inner(wildcards):
-        return lookup(within=metadata, query=metadata_query.format(**wildcards), cols=column)
+        return lookup(within=from_df, query=metadata_query.format(**wildcards), cols=column)
 
     return get_metadata_inner
 
 include: "rules/za.smk"
 include: "rules/vp-momentum.smk"
+include: "rules/time-moment.smk"
 
 
 rule all:
     input:
         vp_momentum_plots=expand(
             "assets/plots/{plot_name}.pdf",
-            plot_name=["Z_A_eff", "Z_A_fit", "vpf_light_ensembles", "vpf_heavy_ensembles", "S_parameter_mf", "vpf_Nf8_mf0.015_42x42x42x56", "renormalised_vpf_Nf8_mf0.015_42x42x42x56"]
+            plot_name=[
+                "Z_A_eff",
+                "Z_A_fit",
+                "vpf_light_ensembles",
+                "vpf_heavy_ensembles",
+                "S_parameter_mf",
+                "vpf_Nf8_mf0.015_42x42x42x56",
+                "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
+                "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
+            ]
         ),
     default_target: True
 
