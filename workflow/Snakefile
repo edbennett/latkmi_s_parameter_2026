@@ -12,6 +12,7 @@ def get_metadata(column):
 
     return get_metadata_inner
 
+include: "rules/za.smk"
 include: "rules/vp-momentum.smk"
 
 
