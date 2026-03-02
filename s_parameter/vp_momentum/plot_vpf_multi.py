@@ -2,12 +2,11 @@
 
 from argparse import ArgumentParser
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..plot import save_or_show
 from ..io import read_numpy_optional
+from ..plot import Props, save_or_show
 from .pade import get_momentum_filter
 from .plot_vpf import read, plot_fit_result
 
@@ -23,27 +22,6 @@ def get_args():
     parser.add_argument("--output_file", default=None)
     parser.add_argument("--q_squared_upper_bound", type=float, default=None)
     return parser.parse_args()
-
-
-class Props:
-    _markers = ["o", "s", "^", "v", "<", "H", ">", "+", "x", "D", "h", "p", "8", "*"]
-    _colours = mpl.color_sequences["tab10"] + ["black", "seagreen", "violet"]
-
-    def __init__(self):
-        self._props = {}
-
-    def get(self, datum):
-        lattice_size = datum["Nx"]
-        assert lattice_size == datum["Ny"] and lattice_size == datum["Nz"]
-        mass = datum["mass"]
-        if (mass, lattice_size) not in self._props:
-            self._props[mass, lattice_size] = (
-                self._colours.pop(0),
-                self._markers.pop(0),
-                f"$am_f={mass}$, $L={lattice_size}$",
-            )
-
-        return self._props[mass, lattice_size]
 
 
 def plot_single_datum(ax, datum, props, Z_A):
