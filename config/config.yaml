@@ -1,4 +1,5 @@
 metadata_file: metadata/ensembles.csv
+spectrum_file: previous_data/spectrum.csv
 plot_styles: styles/prd.mplstyle
 vpf_plot_upper_bounds:
   heavy: 1.1

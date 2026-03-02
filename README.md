@@ -30,6 +30,10 @@ in $N_f = 8$ QCD][paper].
 3. TODO Add instructions on which files to download from data release,
    and where to place them.
 
+``` shellsession
+zenodo_get --doi 10.5281/zenodo.17037868 --glob spectrum.csv --output-dir previous_data
+```
+
 ## Running the workflow
 
 The workflow is run using Snakemake:

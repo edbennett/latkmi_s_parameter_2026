@@ -32,6 +32,7 @@ time_moment_plots = [
 ]
 comparison_plots = [
     "S_tm_vp_comparison",
+    "rho_mass_comparison",
 ]
 tables = [
     "S_parameter",

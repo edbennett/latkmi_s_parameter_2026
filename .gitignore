@@ -5,3 +5,4 @@ assets/
 tmp
 processed_data
 __pycache__
+previous_data/

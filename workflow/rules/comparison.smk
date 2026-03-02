@@ -44,3 +44,24 @@ rule tabulate_vp_tm:
     shell:
         "python -m {params.module} {input.tm_data} {input.vp_data} "
         "--output_file {output.plot}"
+
+
+rule plot_rho:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel="V")
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        previous_data=config["spectrum_file"],
+        script="s_parameter/comparison/plot_rho_mass.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/rho_mass_comparison.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
