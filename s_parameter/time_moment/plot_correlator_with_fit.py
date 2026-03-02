@@ -32,7 +32,7 @@ def plot_fit(ax, fit_result, colour="C0", label="Fit"):
 
 
 def plot(data, fit_result):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
 
     ax.set_yscale("log")
     ax.set_xlabel("$t$")

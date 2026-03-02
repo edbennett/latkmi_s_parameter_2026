@@ -23,7 +23,7 @@ def symmetrise_y_axis(ax):
 
 
 def plot(data):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
 
     ax.set_xlabel("$am_f$")
     ax.set_ylabel(r"$\overline{S}_{IR}$")

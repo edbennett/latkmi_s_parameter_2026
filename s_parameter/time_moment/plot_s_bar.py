@@ -47,7 +47,7 @@ def plot_single_data(ax, data, label, colour):
 
 
 def plot(data, fit_result):
-    fig, ax = plt.subplots(figsize=(3.4, 3), layout="constrained")
+    fig, ax = plt.subplots()
 
     ax.set_xlabel(r"$\overline{t}$")
     ax.set_ylabel(r"$\overline{S}(\overline{t})$")

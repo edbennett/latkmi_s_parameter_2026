@@ -94,7 +94,7 @@ def add_arrow(ax, fit_result):
 
 
 def plot(data, extra_data, fit_result):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
     plot_Z_A_data(ax, data, "o", 6)
     plot_Z_A_data(ax, extra_data, "s", -12)
     ax.set_xlim(0, None)

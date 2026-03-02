@@ -32,7 +32,7 @@ def plot_plateau_lines(ax, ensemble, colour):
 
 
 def plot(data, Z_A_lower_bound=None):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
     markers = "ovsD^"
     for colour_index, (marker, ensemble) in enumerate(
         zip(markers, sorted(data, key=lambda v: v["mass"]))

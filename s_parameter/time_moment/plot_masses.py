@@ -18,7 +18,7 @@ def get_args():
 
 
 def plot(data):
-    fig, axes = plt.subplots(layout="constrained", ncols=2, figsize=(7, 3))
+    fig, axes = plt.subplots(ncols=2, figsize=(7, 3))
     for observable, label, ax in zip(["mass", "decay_const"], ["M", "F"], axes):
         ax.set_xlabel("$am_f$")
         ax.set_ylabel(f"$a{label}_X$")

@@ -72,7 +72,7 @@ def get_suffix(upper_bound_key):
 
 
 def plot(data, Z_A):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
     upper_bounds = sorted(set(datum["upper_bound"] for datum in data))
     lattice_sizes = reversed(sorted(set(datum["Nx"] for datum in data)))
     if len(upper_bounds) <= 2:

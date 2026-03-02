@@ -76,7 +76,7 @@ def plot_single_series(ax, data, secondary_data, key, props):
 
 
 def plot(primary, secondary):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
     props = Props(length_only=True)
 
     plot_single_series(ax, primary, False, "S_infinite_t", props)

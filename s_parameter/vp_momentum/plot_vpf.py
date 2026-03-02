@@ -45,7 +45,7 @@ def plot_fit_result(
 
 
 def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
 
     key = {True: "renormalised_vpf", False: "vpf"}[renormalised]
     title = {

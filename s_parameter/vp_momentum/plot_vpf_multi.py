@@ -54,7 +54,7 @@ def plot_single_fit(ax, datum, props, Z_A):
 
 
 def plot(data=[], fit_results=[], Z_A=None, q_squared_upper_bound=None):
-    fig, ax = plt.subplots(layout="constrained", figsize=(3.4, 3))
+    fig, ax = plt.subplots()
     props = Props()
 
     for fit_result in fit_results:
