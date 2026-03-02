@@ -190,14 +190,12 @@ rule plot_VPF_multiple:
         fit_results=lambda wildcards: get_ensemble_data(f"{wildcards.mass_range}_vpf_fit", "bare_pade_fit_final.json")(wildcards),
         script="s_parameter/vp_momentum/plot_vpf_multi.py",
         plot_styles=config["plot_styles"],
-        Z_A="processed_data/Z_A.json",
     output:
         plot="assets/plots/vpf_{mass_range}_ensembles.pdf",
     conda:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} {params.fit_result_flags} "
-        "--Z_A {input.Z_A} "
         "--plot_styles {input.plot_styles} --output_file {output.plot} "
         "--q_squared_upper_bound {params.q_squared_upper_bound}"
 
@@ -207,12 +205,11 @@ rule plot_S_parameter:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data={
-            f"processed_data/{subdir_format}/bare_pade_fit_final.json".format(
+            f"processed_data/{subdir_format}/renormalised_pade_fit_final.json".format(
                 **metadatum
             )
             for metadatum in metadata.to_dict(orient="records")
         },
-        Z_A="processed_data/Z_A.json",
         script="s_parameter/vp_momentum/plot_s_parameter.py",
         plot_styles=config["plot_styles"],
     output:
@@ -220,7 +217,7 @@ rule plot_S_parameter:
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --Z_A {input.Z_A} "
+        "python -m {params.module} {input.data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
@@ -229,14 +226,13 @@ rule plot_fit_range_comparison_large_volume:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data={
-            f"processed_data/{subdir_format}/bare_pade_fit_{upper_bound}.json".format(
+            f"processed_data/{subdir_format}/renormalised_pade_fit_{upper_bound}.json".format(
                 **metadatum
             )
             for metadatum in metadata.to_dict(orient="records")
             for upper_bound in ["max2", "max3"]
             if metadatum["Nx"] >= 24
         },
-        Z_A="processed_data/Z_A.json",
         script="s_parameter/vp_momentum/plot_s_parameter.py",
         plot_styles=config["plot_styles"],
     output:
@@ -244,7 +240,7 @@ rule plot_fit_range_comparison_large_volume:
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --Z_A {input.Z_A} "
+        "python -m {params.module} {input.data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
@@ -253,14 +249,13 @@ rule plot_fit_range_comparison_small_volume:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data={
-            f"processed_data/{subdir_format}/bare_pade_fit_{upper_bound}.json".format(
+            f"processed_data/{subdir_format}/renormalised_pade_fit_{upper_bound}.json".format(
                 **metadatum
             )
             for metadatum in metadata.to_dict(orient="records")
             for upper_bound in ["1", "max2", "max3"]
             if metadatum["Nx"] == 18
         },
-        Z_A="processed_data/Z_A.json",
         script="s_parameter/vp_momentum/plot_s_parameter.py",
         plot_styles=config["plot_styles"],
     output:
@@ -268,5 +263,5 @@ rule plot_fit_range_comparison_small_volume:
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --Z_A {input.Z_A} "
+        "python -m {params.module} {input.data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
