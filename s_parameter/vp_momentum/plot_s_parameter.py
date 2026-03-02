@@ -106,7 +106,10 @@ def plot(data, Z_A):
 
     if ax.get_xlim()[0] < 0.03:
         ax.set_xlim(0, None)
-    ax.set_ylim(0.2, 0.3)
+    if len(upper_bounds) > 1:
+        ax.set_ylim(0.2, 0.3)
+    else:
+        ax.set_ylim(0, 0.35)
 
     return fig
 
