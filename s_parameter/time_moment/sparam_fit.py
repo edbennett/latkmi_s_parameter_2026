@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser, FileType
 from functools import partial
-import hashlib
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -24,38 +23,6 @@ def get_args():
     parser.add_argument("--max_timeslice", type=int, default=None)
     parser.add_argument("--output_file", type=FileType("w"), default="-")
     return parser.parse_args()
-
-
-def get_rng(data):
-    """
-    Get an RNG with a consistent seed for a given ensemble,
-    so that the data are (more) reproducible,
-    rather than introducing large fluctuations each time the samples are regenerated.
-    """
-    seed_string = "Nf8_mf{mass}_{Nx}x{Ny}x{Nz}x{Nt}_bin{bin_size}".format(**data)
-    hash_string = hashlib.md5(seed_string.encode("utf8")).digest()
-    seed = abs(int.from_bytes(hash_string, "big"))
-    return np.random.default_rng(seed)
-
-
-def generate_jackknife(mass, mass_error, data):
-    """
-    The original correlator logs and jackknife samples
-    for most of the ensembles we are considering for this work
-    are lost to time.
-    As such,
-    we need to regenerate sample sets
-    to propagate the error in the spectrum into the fit,
-    since the latter must be done via a bootstrap.
-    For consistency,
-    we do this for all ensembles,
-    even the mf=0.009 ensemble where the bootstrap samples are available
-    in the data release to arXiv:2505.08658
-    """
-    sample_shape = data["Conserved"]["V-A_renormalised_samples"].shape[:-1]
-    rng = get_rng(data)
-    distribution_std = mass_error / (np.prod(sample_shape) - 1) ** 0.5
-    return rng.normal(mass, distribution_std, sample_shape)
 
 
 def fit_form(time, C_A_plus, C_A_minus, C_V_plus, C_V_minus, m_a_1, m_rho, max_time):

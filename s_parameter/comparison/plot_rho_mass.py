@@ -1,22 +1,10 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ..io import read_numpy
-from ..plot import Props, save_or_show
-
-
-def get_args():
-    parser = ArgumentParser()
-    parser.add_argument("input_files", metavar="input_file", nargs="+")
-    parser.add_argument("--previous_data", required=True)
-    parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
-    parser.add_argument("--output_file", default=None)
-    return parser.parse_args()
+from ..plot import Props, comparison_plot_main
 
 
 def add_old_data(ax, target_ensembles, source_data, marker):
@@ -83,15 +71,5 @@ def plot(new_data, old_data):
     return fig
 
 
-def main():
-    args = get_args()
-    plt.style.use(args.plot_styles)
-    new_data = [read_numpy(input_file) for input_file in args.input_files]
-    old_data = pd.read_csv(args.previous_data)
-
-    fig = plot(new_data, old_data)
-    save_or_show(fig, args.output_file)
-
-
 if __name__ == "__main__":
-    main()
+    comparison_plot_main(plot)

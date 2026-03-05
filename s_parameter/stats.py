@@ -2,6 +2,8 @@
 Tools for binning and jackknife analysis.
 """
 
+import hashlib
+
 from math import prod
 import numpy as np
 
@@ -98,3 +100,43 @@ def bin_data(data, bin_size):
         )
         .mean(axis=1)
     )
+
+
+def product_error_contribution(data, *keys):
+    values = data[[f"value_{key}" for key in keys]]
+    errors = data[[f"error_{key}" for key in keys]]
+    contributions = (errors.to_numpy() / values.to_numpy()) ** 2
+    return contributions.sum(axis=1) ** 0.5
+
+
+def get_rng(data):
+    """
+    Get an RNG with a consistent seed for a given ensemble,
+    so that the data are (more) reproducible,
+    rather than introducing large fluctuations each time the samples are regenerated.
+    """
+    seed_string = "Nf8_mf{mass}_{Nx}x{Ny}x{Nz}x{Nt}_bin{bin_size}".format(**data)
+    hash_string = hashlib.md5(seed_string.encode("utf8")).digest()
+    seed = abs(int.from_bytes(hash_string, "big"))
+    return np.random.default_rng(seed)
+
+
+def generate_jackknife(mass, mass_error, data, shape):
+    """
+    The original correlator logs and jackknife samples
+    for most of the ensembles we are considering for this work
+    are lost to time.
+    As such,
+    we need to regenerate sample sets
+    to propagate the error in the spectrum into the fit,
+    since the latter must be done via a bootstrap.
+    For consistency,
+    we do this for all ensembles,
+    even the mf=0.009 ensemble where the bootstrap samples are available
+    in the data release to arXiv:2505.08658
+    """
+    rng = get_rng(data)
+    if isinstance(shape, float):
+        shape = [shape]
+    distribution_std = mass_error / (np.prod(shape) - 1) ** 0.5
+    return rng.normal(mass, distribution_std, shape)

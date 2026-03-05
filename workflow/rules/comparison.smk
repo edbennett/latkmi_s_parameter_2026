@@ -65,3 +65,67 @@ rule plot_rho:
     shell:
         "python -m {params.module} {input.data} --previous_data {input.previous_data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_a_1_rho_ratio:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel=channel)
+            for channel in ["V", "A"]
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        previous_data=config["spectrum_file"],
+        script="s_parameter/comparison/plot_a_1_rho_ratio.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/a_1_over_rho_comparison.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_rho_a_1_decay_ratio:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel=channel)
+            for channel in ["V", "A"]
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        script="s_parameter/comparison/plot_rho_a_1_decay_ratio.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/rho_over_a_1_decay_comparison.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data}  "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_rho_pi_decay_ratio:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel="V")
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        previous_data=config["spectrum_file"],
+        script="s_parameter/comparison/plot_rho_pi_decay_ratio.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/rho_over_pi_decay_comparison.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"

@@ -89,3 +89,16 @@ def read_Z_A(filename):
     data["Z_A_eff"] = np.array(data["Z_A_eff"][0])
     data["Z_A_samples"] = np.array(data["Z_A_samples"])
     return data
+
+
+def get_samples(data, ensemble_mass, key):
+    result = [
+        datum["fit_result_samples"][key]
+        for datum in data
+        if key in datum["fit_result_samples"] and datum["mass"] == ensemble_mass
+    ]
+    if len(result) != 1:
+        breakpoint()
+        raise ValueError("Missing or duplicate data")
+
+    return result[0]

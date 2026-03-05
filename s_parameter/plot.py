@@ -2,8 +2,14 @@
 Tools for plotting.
 """
 
+from argparse import ArgumentParser
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+import pandas as pd
+
+from .io import read_numpy
 
 
 def save_or_show(fig, plot_target):
@@ -60,3 +66,58 @@ class Props:
             )
 
         return self._props[key]
+
+
+def get_args(old_data=True):
+    parser = ArgumentParser()
+    parser.add_argument("input_files", metavar="input_file", nargs="+")
+    if old_data:
+        parser.add_argument("--previous_data", required=True)
+    parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
+    parser.add_argument("--output_file", default=None)
+    return parser.parse_args()
+
+
+def comparison_plot_main(callback, old_data=True):
+    args = get_args(old_data)
+    plt.style.use(args.plot_styles)
+
+    new_data = [read_numpy(input_file) for input_file in args.input_files]
+
+    params = {}
+    if old_data:
+        params["old_data"] = pd.read_csv(args.previous_data)
+
+    fig = callback(new_data, **params)
+    save_or_show(fig, args.output_file)
+
+
+def add_qcd_value(ax, numerator, denominator=None):
+    # S. Navas et al. (Particle Data Group),
+    # Phys. Rev. D 110, 030001 (2024) and 2025 update.
+    qcd_values = {
+        # https://pdglive.lbl.gov/Particle.action?init=0&node=M009&home=MXXX005
+        "rho_mass": 770.26,
+        # https://pdglive.lbl.gov/DataBlock.action?node=M010M
+        "a_1_mass": 1230,
+        # https://arxiv.org/pdf/1507.02541
+        "rho_decay_const": 221.1,
+        # WHERE CAN THIS NUMBER COME FROM???
+        "a_1_decay_const": 300,
+        # ??????
+        "pi_decay_const": 130.2,
+    }
+    value = qcd_values[numerator]
+    if denominator is not None:
+        value /= qcd_values[denominator]
+
+    ax.plot(
+        [0],
+        [value],
+        marker="*",
+        markersize=10,
+        color="black",
+        fillstyle="full",
+        label="Real-world QCD",
+        linestyle="none",
+    )
