@@ -111,7 +111,7 @@ rule meson_table:
         ],
         script="s_parameter/time_moment/tabulate_masses.py",
     output:
-        plot="processed_data/spectrum.tex",
+        plot="assets/tables/spectrum.tex",
     conda:
         "../envs/python.yml"
     shell:
