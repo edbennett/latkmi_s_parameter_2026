@@ -129,3 +129,47 @@ rule plot_rho_pi_decay_ratio:
     shell:
         "python -m {params.module} {input.data} --previous_data {input.previous_data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_ksrf_i_ii:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel="V")
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        previous_data=config["spectrum_file"],
+        script="s_parameter/comparison/plot_ksrf_i_ii.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/ksrf_i_ii.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_ksrf_ii_lsd:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.meson_v_a.output.data.format(**row, channel="V")
+            for row in metadata.to_dict(orient="records")
+            if row["plot_light_ensembles"]
+        ],
+        previous_data=config["spectrum_file"],
+        lsd_data="external_data/lsd_prd19_spectra_nf08_table_1_3_4.csv",
+        script="s_parameter/comparison/plot_ksrf_ii_lsd.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/ksrf_ii_lsd.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--lsd_data {input.lsd_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
