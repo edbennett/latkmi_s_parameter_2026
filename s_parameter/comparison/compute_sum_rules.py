@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser, FileType
+
+import numpy as np
+import pandas as pd
+
+from ..io import read_numpy, dump_numpy
+from ..stats import jackknife_mean_variance, generate_jackknife
+
+
+METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+
+
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument("input_files", metavar="input_file", nargs="+")
+    parser.add_argument("--previous_data", required=True)
+    parser.add_argument("--output_file", default="-", type=FileType("w"))
+    return parser.parse_args()
+
+
+def combine_samples(data):
+    """
+    Combine results of multiple different fits into a single dict for ease of processing.
+    """
+    if not data:
+        return {}
+
+    to_remove = []
+    result = data[0]
+    for datum in data[1:]:
+        for key in METADATA_KEYS:
+            if result[key] != datum[key]:
+                raise ValueError(f"Data mismatch: {result[key]} != {datum[key]}")
+        for key in datum["fit_result"]:
+            if key in result["fit_result"]:
+                to_remove.append(key)
+                del result["fit_result"][key]
+                del result["fit_result_samples"][key]
+
+            if key in to_remove:
+                continue
+
+            result["fit_result"][key] = datum["fit_result"][key]
+            result["fit_result_samples"][key] = datum["fit_result_samples"][key]
+
+    return result
+
+
+def get_old_data(datum, old_data, key):
+    result = old_data.query(
+        "Nf == 8 & beta == 3.8 & "
+        f"L == {datum['Nx']} & T == {datum['Nt']} & mf == {datum['mass']}"
+    )
+    assert datum["Nx"] == datum["Ny"] and datum["Nx"] == datum["Nz"]
+    if len(result.index) > 1:
+        raise ValueError("Multiple ensembles found.")
+    if len(result.index) == 0:
+        return None, None
+    value = result[f"value_{key}"].iloc[0]
+    error = result[f"error_{key}"].iloc[0]
+    return value, error
+
+
+def add_generated_samples(new_datum, old_data):
+    """
+    Take the preexisting data from old_data for the ensemble described in new_datum,
+    generate jackknife samples for relevant observables,
+    and add these to new_datum.
+    """
+    num_samples = len(next(iter(new_datum["fit_result_samples"].values())))
+
+    for old_key, new_key in [
+        ("fpi", "pi_decay_const"),
+        ("mpi", "pi_mass"),
+        ("t0c", "t0"),
+    ]:
+        value, error = get_old_data(new_datum, old_data, old_key)
+        if value:
+            samples = generate_jackknife(value, error, new_datum, num_samples)
+        else:
+            samples, value, error = np.array([np.nan]), np.nan, np.nan
+
+        new_datum["fit_result_samples"][new_key] = samples
+        new_datum["fit_result"][new_key] = [value, error]
+
+
+def wsr_i(samples):
+    """
+    First Weinberg sum rule; see Eq. (45) of the paper
+    """
+    f_rho = samples["rho_decay_const"]
+    f_pi = samples["pi_decay_const"]
+    f_a_1 = samples["a_1_decay_const"]
+
+    return f_rho**2 - f_a_1**2 - f_pi**2
+
+
+def wsr_i_normalised(samples):
+    """
+    First Weinberg sum rule with normalisation; see Fig. 12 of the paper.
+    """
+    f_rho = samples["rho_decay_const"]
+    f_pi = samples["pi_decay_const"]
+    f_a_1 = samples["a_1_decay_const"]
+
+    return wsr_i(samples) / (f_rho**2 + f_a_1**2 + f_pi**2)
+
+
+def wsr_ii(samples):
+    """
+    Second Weinberg sum rule with normalisation; see Eq. (46) and Fig. 12 of the paper
+    """
+    f_m_rho_squared = (samples["rho_decay_const"] * samples["rho_mass"]) ** 2
+    f_m_a_1_squared = (samples["a_1_decay_const"] * samples["a_1_mass"]) ** 2
+
+    return f_m_rho_squared - f_m_a_1_squared
+
+
+def wsr_ii_normalised(samples):
+    """
+    Second Weinberg sum rule with normalisation; see Fig. 12 of the paper.
+    """
+    f_m_rho_squared = (samples["rho_decay_const"] * samples["rho_mass"]) ** 2
+    f_m_a_1_squared = (samples["a_1_decay_const"] * samples["a_1_mass"]) ** 2
+
+    return wsr_ii(samples) / (f_m_rho_squared + f_m_a_1_squared)
+
+
+def ksrf_i(samples):
+    """
+    First Kawarabayashi-Suzuki-Riazuddin-Fayyazuddin relation;
+    see Eq. (35) of the paper.
+    """
+    return (
+        samples["rho_mass"]
+        * samples["rho_decay_const"]
+        / (2**0.5 * samples["pi_decay_const"] ** 2)
+    )
+
+
+def ksrf_ii(samples):
+    """
+    Second Kawarabayashi-Suzuki-Riazuddin-Fayyazuddin relation;
+    see Eq. (36) of the paper.
+    """
+    return samples["rho_mass"] / samples["pi_decay_const"]
+
+
+def dmo(samples):
+    """
+    Das-Mathur-Okubo sum rule; see Eq. (44) of the paper.
+    """
+    f_rho = samples["rho_decay_const"]
+    f_a_1 = samples["a_1_decay_const"]
+    m_rho = samples["rho_mass"]
+    m_a_1 = samples["a_1_mass"]
+    return 2 * np.pi * (f_rho**2 / m_rho**2 - f_a_1**2 / m_a_1**2)
+
+
+rules = {
+    "frho-fpi": lambda s: s["rho_decay_const"]
+    / s["pi_decay_const"],  # TODO check normalisation
+    "frho-fa1": lambda s: s["rho_decay_const"] / s["a_1_decay_const"],
+    "ma1-mrho": lambda s: s["a_1_mass"] / s["rho_mass"],
+    "mrho_s8t0": lambda s: s["rho_mass"] * (8 * s["t0"]) ** 0.5,
+    "mpi_L": lambda s: s["pi_mass"] * s["Nx"],
+    "wsr-i": wsr_i,
+    "wsr-ii": wsr_ii,
+    "wsr-i-normalised": wsr_i_normalised,
+    "wsr-ii-normalised": wsr_ii_normalised,
+    "ksrf-i": ksrf_i,
+    "ksrf-ii": ksrf_ii,
+    "dmo": dmo,
+}
+
+
+def compute_sum_rules(data):
+    result = {}
+    for name, func in rules.items():
+        result[name] = jackknife_mean_variance(
+            func({**data, **data["fit_result_samples"]})
+        )
+
+    return result
+
+
+def main():
+    args = get_args()
+
+    new_data = combine_samples(
+        [read_numpy(input_file) for input_file in args.input_files]
+    )
+    old_data = pd.read_csv(args.previous_data)
+    add_generated_samples(new_data, old_data)
+
+    result = compute_sum_rules(new_data)
+    dump_numpy(
+        {
+            **result,
+            **{key: new_data[key] for key in METADATA_KEYS},
+        },
+        args.output_file,
+    )
+
+
+if __name__ == "__main__":
+    main()

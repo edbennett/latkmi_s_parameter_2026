@@ -46,6 +46,25 @@ rule tabulate_vp_tm:
         "--output_file {output.plot}"
 
 
+rule compute_sum_rules:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            f"processed_data/{subdir_format}/{channel}_mass_decay.json"
+            for channel in ["V", "A"]
+        ],
+        previous_data=config["spectrum_file"],
+        script="s_parameter/comparison/compute_sum_rules.py",
+    output:
+        data=f"processed_data/{subdir_format}/sum_rules.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--output_file {output.data}"
+
+
 rule plot_rho:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
@@ -67,101 +86,83 @@ rule plot_rho:
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
-rule plot_a_1_rho_ratio:
+rule comparison_plot:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule simple_comparison_plot:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=[
-            rules.meson_v_a.output.data.format(**row, channel=channel)
-            for channel in ["V", "A"]
+            rules.compute_sum_rules.output.data.format(**row)
             for row in metadata.to_dict(orient="records")
             if row["plot_light_ensembles"]
         ],
+        script="s_parameter/comparison/plot_simple_ratio.py",
+        plot_styles=config["plot_styles"],
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --plot_type {params.plot_type} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule comparison_plot_with_previous:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+use rule comparison_plot_with_previous as plot_a_1_rho_ratio with:
+    input:
+        data=rules.simple_comparison_plot.input.data,
         previous_data=config["spectrum_file"],
         script="s_parameter/comparison/plot_a_1_rho_ratio.py",
         plot_styles=config["plot_styles"],
     output:
-        plot="assets/plots/a_1_over_rho_comparison.pdf",
-    conda:
-        "../envs/python.yml"
-    shell:
-        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
-        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+        plot="assets/plots/a_1_over_rho_mass_comparison.pdf",
 
 
-rule plot_rho_a_1_decay_ratio:
+use rule simple_comparison_plot as plot_rho_a_1_decay_ratio with:
     params:
-        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
-    input:
-        data=[
-            rules.meson_v_a.output.data.format(**row, channel=channel)
-            for channel in ["V", "A"]
-            for row in metadata.to_dict(orient="records")
-            if row["plot_light_ensembles"]
-        ],
-        script="s_parameter/comparison/plot_rho_a_1_decay_ratio.py",
-        plot_styles=config["plot_styles"],
+        plot_type="frho-fa1",
     output:
         plot="assets/plots/rho_over_a_1_decay_comparison.pdf",
-    conda:
-        "../envs/python.yml"
-    shell:
-        "python -m {params.module} {input.data}  "
-        "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
-rule plot_rho_pi_decay_ratio:
+use rule simple_comparison_plot as plot_rho_pi_decay_ratio with:
     params:
-        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
-    input:
-        data=[
-            rules.meson_v_a.output.data.format(**row, channel="V")
-            for row in metadata.to_dict(orient="records")
-            if row["plot_light_ensembles"]
-        ],
-        previous_data=config["spectrum_file"],
-        script="s_parameter/comparison/plot_rho_pi_decay_ratio.py",
-        plot_styles=config["plot_styles"],
+        plot_type="frho-fpi",
     output:
         plot="assets/plots/rho_over_pi_decay_comparison.pdf",
-    conda:
-        "../envs/python.yml"
-    shell:
-        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
-        "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
-rule plot_ksrf_i_ii:
-    params:
-        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+use rule comparison_plot as plot_ksrf_i_ii with:
     input:
-        data=[
-            rules.meson_v_a.output.data.format(**row, channel="V")
-            for row in metadata.to_dict(orient="records")
-            if row["plot_light_ensembles"]
-        ],
+        data=rules.simple_comparison_plot.input.data,
         previous_data=config["spectrum_file"],
         script="s_parameter/comparison/plot_ksrf_i_ii.py",
         plot_styles=config["plot_styles"],
     output:
         plot="assets/plots/ksrf_i_ii.pdf",
-    conda:
-        "../envs/python.yml"
-    shell:
-        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
-        "--plot_styles {input.plot_styles} --output_file {output.plot}"
 
 
 rule plot_ksrf_ii_lsd:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        data=[
-            rules.meson_v_a.output.data.format(**row, channel="V")
-            for row in metadata.to_dict(orient="records")
-            if row["plot_light_ensembles"]
-        ],
-        previous_data=config["spectrum_file"],
+        data=rules.simple_comparison_plot.input.data,
         lsd_data="external_data/lsd_prd19_spectra_nf08_table_1_3_4.csv",
         script="s_parameter/comparison/plot_ksrf_ii_lsd.py",
         plot_styles=config["plot_styles"],
@@ -170,6 +171,66 @@ rule plot_ksrf_ii_lsd:
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "python -m {params.module} {input.data} --lsd_data {input.lsd_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+use rule simple_comparison_plot as plot_wsr with:
+    params:
+        plot_type="wsr-{wsr_idx}-normalised",
+    output:
+        plot="assets/plots/wsr_{wsr_idx}.pdf",
+
+
+rule sum_rules:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.simple_comparison_plot.input.data,
+        script="s_parameter/comparison/tabulate_sum_rules.py",
+    output:
+        plot="assets/tables/sum_rules.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --output_file {output.plot}"
+
+
+rule S_parameter_group_by_mass:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        S_data=rules.plot_S_parameter.input.data,
+        spectrum_data="previous_data/spectrum.csv",
+        script="s_parameter/comparison/plot_S_all_ensembles.py",
+        plot_styles=config["plot_styles"],
+    output:
+        plot="assets/plots/S_parameter_mpi_L_group_by_mass.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.S_data} "
+        "--spectrum_data {input.spectrum_data} "
+        "--group_by mass "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule S_parameter_group_by_volume:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        S_data=rules.plot_S_parameter.input.data,
+        spectrum_data="previous_data/spectrum.csv",
+        script="s_parameter/comparison/plot_S_all_ensembles.py",
+        plot_styles=config["plot_styles"],
+        lsd_data="external_data/lsd_prd14_spectra_sparameter_table_6.csv",
+    output:
+        plot="assets/plots/S_parameter_mpi_L_group_by_length.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.S_data} "
+        "--spectrum_data {input.spectrum_data} "
         "--lsd_data {input.lsd_data} "
+        "--group_by length "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"

@@ -33,9 +33,19 @@ time_moment_plots = [
 comparison_plots = [
     "S_tm_vp_comparison",
     "rho_mass_comparison",
+    "a_1_over_rho_mass_comparison.pdf",
+    "rho_over_a_1_decay_comparison",
+    "rho_over_pi_decay_comparison",
+    "ksrf_i_ii",
+    "ksrf_ii_lsd",
+    "wsr_i",
+    "wsr_ii",
+    "S_parameter_mpi_L_group_by_mass",
+    "S_parameter_mpi_L_group_by_length",
 ]
 tables = [
     "S_parameter",
+    "sum_rules",
 ]
 
 rule all:

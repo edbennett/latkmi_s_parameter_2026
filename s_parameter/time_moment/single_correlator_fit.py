@@ -26,21 +26,33 @@ def get_args():
 
 
 def fit_form(time, mass_main, decay_const_main, mass_osc, decay_const_osc, max_time):
-    return decay_const_main**2 * (
+    return mass_main * decay_const_main**2 / 2 * (
         np.exp(-mass_main * time) + np.exp(-mass_main * (max_time - time))
-    ) - decay_const_osc**2 * (-1) ** time * (
+    ) - mass_osc * decay_const_osc**2 / 2 * (-1) ** time * (
         np.exp(-mass_osc * time) + np.exp(-mass_main * (max_time - time))
     )
 
 
 def fit_single(samples, min_timeslice, max_timeslice):
     _, data_uncertainty = jackknife_mean_variance(samples)
+
+    range_fit_form = partial(fit_form, max_time=(samples[0].shape[-1] - 1) * 2)
+    target_range = np.arange(min_timeslice, max_timeslice)
+    target_slice = slice(min_timeslice, max_timeslice)
+
+    starting_guess, _ = curve_fit(
+        range_fit_form,
+        target_range,
+        samples.mean(axis=0)[target_slice],
+        sigma=data_uncertainty[target_slice],
+    )
     return [
         curve_fit(
-            partial(fit_form, max_time=(sample.shape[-1] - 1) * 2),
-            np.arange(min_timeslice, max_timeslice),
-            sample[min_timeslice:max_timeslice],
-            sigma=data_uncertainty[min_timeslice:max_timeslice],
+            range_fit_form,
+            target_range,
+            sample[target_slice],
+            sigma=data_uncertainty[target_slice],
+            p0=starting_guess,
         )[0]
         for sample in samples
     ]

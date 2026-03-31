@@ -102,3 +102,27 @@ def get_samples(data, ensemble_mass, key):
         raise ValueError("Missing or duplicate data")
 
     return result[0]
+
+
+def update_without_overwrite(dest, source):
+    for key in source:
+        if key in dest:
+            if isinstance(dest[key], dict) and isinstance(source[key], dict):
+                update_without_overwrite(dest[key], source[key])
+            else:
+                assert dest[key] == source[key]
+        else:
+            dest[key] = source[key]
+
+
+def collate_ensembles(data):
+    collated_data = {}
+    for datum in data:
+        descriptor_keys = ["Nt", "Nx", "Ny", "Nz", "mass"]
+        descriptor = tuple(datum[key] for key in descriptor_keys)
+        if descriptor in collated_data:
+            update_without_overwrite(collated_data[descriptor], datum)
+        else:
+            collated_data[descriptor] = datum
+
+    return list(collated_data.values())

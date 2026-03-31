@@ -3,26 +3,18 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from ..io import get_samples
-from ..stats import jackknife_mean_variance, product_error_contribution
-from ..plot import Props, comparison_plot_main, add_qcd_value
+from ..plot import comparison_plot_main, iterate_lengths, plot_new_series, add_qcd_value
 
 
 def get_unique_masses(data):
     return sorted(set(datum["mass"] for datum in data))
 
 
-def get_ratio(data, numerator="a_1_mass", denominator="rho_mass"):
-    result = []
-
-    masses = get_unique_masses(data)
-    for mass in masses:
-        numerator_masses = get_samples(data, mass, numerator)
-        denominator_masses = get_samples(data, mass, denominator)
-        ratio_samples = numerator_masses / denominator_masses
-        result.append(jackknife_mean_variance(ratio_samples))
-
-    return masses, *zip(*result)
+def product_error_contribution(data, *keys):
+    return (
+        sum([(data[f"error_{key}"] / data[f"value_{key}"]) ** 2 for key in keys]).sum()
+        ** 0.5
+    )
 
 
 def add_old_data(ax, target_ensembles, source_data, marker):
@@ -52,32 +44,14 @@ def add_old_data(ax, target_ensembles, source_data, marker):
     )
 
 
-def add_new_data(ax, data, colour, marker, label):
-    masses, ratios, errors = get_ratio(data)
-    ax.errorbar(
-        masses,
-        ratios,
-        yerr=errors,
-        marker=marker,
-        color=colour,
-        linestyle="none",
-        label=label,
-    )
-
-
 def plot(new_data, old_data):
     fig, ax = plt.subplots()
 
     ax.set_xlabel(r"$am_{f}$")
     ax.set_ylabel(r"$M_{a_1} / M_{\mathrm{\rho}}$")
 
-    lengths = reversed(sorted(set(datum["Nx"] for datum in new_data)))
-    props = Props(length_only=True)
-
-    for length in lengths:
-        subset = [datum for datum in new_data if datum["Nx"] == length]
-        colour, marker, label = props.get(subset[0])
-        add_new_data(ax, subset, colour, marker, label)
+    for subset, (colour, marker, label) in iterate_lengths(new_data):
+        plot_new_series(ax, subset, "ma1-mrho", colour, marker, label)
         add_old_data(ax, subset, old_data, marker)
 
     add_qcd_value(ax, "a_1_mass", "rho_mass")
@@ -89,4 +63,4 @@ def plot(new_data, old_data):
 
 
 if __name__ == "__main__":
-    comparison_plot_main(plot)
+    comparison_plot_main(plot, old_data=True)
