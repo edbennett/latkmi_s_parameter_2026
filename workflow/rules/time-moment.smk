@@ -139,6 +139,45 @@ rule S_parameter_tm_fit:
         "--output_file {output.data}"
 
 
+rule finite_volume_factor:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.S_parameter_tm_fit.output.data,
+        spectrum=config["spectrum_file"],
+        script="s_parameter/time_moment/finite_volume.py",
+    output:
+        data=f"processed_data/{subdir_format}/finite_volume_factor.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --previous_data {input.spectrum} "
+        "--output_file {output.data}"
+
+
+def multi_volume_ensembles():
+    metadata_filter = metadata.value_counts("mf") > 1
+    masses = list(metadata_filter[metadata_filter].index)
+    return metadata.query(f"mf in {masses}")
+
+
+rule finite_volume_fit:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=[
+            rules.finite_volume_factor.output.data.format(**ensemble)
+            for ensemble in multi_volume_ensembles().to_dict(orient="records")
+        ],
+        script="s_parameter/time_moment/finite_volume_fit.py",
+    output:
+        data="processed_data/finite_volume_fit.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --output_file {output.data}"
+
+
 rule plot_zero_momentum_correlator:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
