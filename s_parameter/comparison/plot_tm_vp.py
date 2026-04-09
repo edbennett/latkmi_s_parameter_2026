@@ -12,6 +12,7 @@ import numpy as np
 
 from ..io import read_numpy
 from ..plot import Props, save_or_show
+from ..utils import nested_get
 
 
 def get_args():
@@ -26,21 +27,6 @@ def get_args():
     parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
     parser.add_argument("--output_file", default=None)
     return parser.parse_args()
-
-
-def nested_get(datum, keys):
-    """
-    Where a key has multiple parts,
-    treat each level as a key to nested dictionary.
-    """
-    # For convenience, allow a single level to be given without packaging it in a list
-    if isinstance(keys, str):
-        keys = [keys]
-
-    for key in keys:
-        datum = datum[key]
-
-    return datum
 
 
 def plot_single_series(ax, data, secondary_data, key, props):

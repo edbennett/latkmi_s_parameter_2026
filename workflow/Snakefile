@@ -29,6 +29,7 @@ vp_momentum_plots = [
 ]
 time_moment_plots = [
     "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
+    "finite_volume_fit",
 ]
 comparison_plots = [
     "S_tm_vp_comparison",

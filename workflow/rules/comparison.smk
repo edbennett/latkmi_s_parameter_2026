@@ -234,3 +234,41 @@ rule S_parameter_group_by_volume:
         "--lsd_data {input.lsd_data} "
         "--group_by length "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule S_parameter_infinite_volume_comparison:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        time_moment_infinite_volume=[
+            rules.infinite_volume_extrapolate.output.data.format(**ensemble)
+            for ensemble in metadata.query(
+                "plot_large_volume_light_ensembles"
+            ).to_dict(orient="records")
+        ],
+        time_moment_finite_volume=[
+            rules.S_parameter_tm_fit.output.data.format(**ensemble)
+            for ensemble in metadata.query(
+                "plot_large_volume_light_ensembles"
+            ).to_dict(orient="records")
+        ],
+        vp_momentum_finite_volume=[
+            rules.pade_fit_renormalised.output.data.format(
+                **ensemble, upper_bound="final"
+            )
+            for ensemble in metadata.query(
+                "plot_large_volume_light_ensembles"
+            ).to_dict(orient="records")
+        ],
+        plot_styles=config["plot_styles"],
+        script="s_parameter/comparison/plot_infinite_volume_S.py",
+    output:
+        plot="assets/plots/S_parameter_infinite_volume_comparison.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} "
+        "--time_moment_infinite_volume {input.time_moment_infinite_volume} "
+        "--time_moment_finite_volume {input.time_moment_finite_volume} "
+        "--vp_momentum_finite_volume {input.vp_momentum_finite_volume} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"

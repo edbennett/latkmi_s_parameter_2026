@@ -191,6 +191,28 @@ rule finite_volume_fit_form:
         "python -m {params.module} --output_file {output.data}"
 
 
+rule infinite_volume_extrapolate:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=lambda wildcards: [
+            rules.finite_volume_factor.output.data.format(**ensemble)
+            for ensemble in metadata.query(
+                f"Nf == {wildcards.Nf} & mf == {wildcards.mf}"
+            ).to_dict(orient="records")
+        ],
+        fit=rules.finite_volume_fit.output.data,
+        script="s_parameter/time_moment/infinite_volume_single_ensemble.py",
+    output:
+        data="processed_data/nf{Nf}/mf{mf}/infinite_volume_S.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --fit_result {input.fit} "
+        "--output_file {output.data}"
+
+
+
 rule plot_zero_momentum_correlator:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
