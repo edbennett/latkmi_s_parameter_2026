@@ -167,7 +167,7 @@ def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time):
     """
     The full Eq. (49)
     """
-    result = (
+    return (
         pi_mass**3
         / 3
         * half_infinite_sum(
@@ -178,20 +178,19 @@ def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time):
             ]
         )
     )
-    print(result)
-    return result
 
 
-def delta_fv_S(length, pi_mass, inner_projected_decay_time=42):
+def delta_fv_S(
+    length, pi_mass, inner_projected_decay_time=42, outer_projected_decay_time=50
+):
     """
     Eq. (52), without the $C$ factor.
     """
-    projected_decay_time = 100
     data = np.array(
         [
             time**2
             * delta_fv_g_pi_pi(time, length, pi_mass, inner_projected_decay_time)
-            for time in range(1, projected_decay_time)
+            for time in range(1, outer_projected_decay_time)
         ]
     )
     return -2 * np.pi * half_infinite_sum(data)

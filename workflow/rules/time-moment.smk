@@ -178,6 +178,19 @@ rule finite_volume_fit:
         "python -m {params.module} {input.data} --output_file {output.data}"
 
 
+rule finite_volume_fit_form:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        script="s_parameter/time_moment/finite_volume_fit_form.py",
+    output:
+        data="processed_data/finite_volume_fit_form.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} --output_file {output.data}"
+
+
 rule plot_zero_momentum_correlator:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
@@ -245,4 +258,23 @@ rule plot_S_contributions_timemoment:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule plot_S_infinite_volume_fit:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.finite_volume_fit.input.data,
+        fit_result=rules.finite_volume_fit.output.data,
+        fit_form=rules.finite_volume_fit_form.output.data,
+        plot_styles=config["plot_styles"],
+        script="s_parameter/time_moment/plot_finite_volume_fit.py",
+    output:
+        plot="assets/plots/finite_volume_fit.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--fit_result {input.fit_result} --fit_form {input.fit_form} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"

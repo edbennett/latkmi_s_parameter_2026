@@ -49,6 +49,9 @@ class Props:
         self.mass_only = mass_only
         assert not (length_only and mass_only)
 
+    def burn(self):
+        return self._colours.pop(0), self._markers.pop(0)
+
     def get(self, datum):
         lattice_size = datum["Nx"]
         assert lattice_size == datum["Ny"] and lattice_size == datum["Nz"]

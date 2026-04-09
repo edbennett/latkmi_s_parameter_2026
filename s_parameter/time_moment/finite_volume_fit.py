@@ -58,7 +58,12 @@ def fit(data):
         sigma=[datum["S_infinite_t"][0] for datum in data],
         p0=starting_guess,
     )
-    return mass_ordering, [*zip(fit_mean, fit_covariance.diagonal())]
+    const_coefficient, *S_infinite_volume = zip(fit_mean, fit_covariance.diagonal())
+    return {
+        "masses": mass_ordering,
+        "C": const_coefficient,
+        "S_infinite_volume": S_infinite_volume,
+    }
 
 
 def main():
