@@ -18,7 +18,7 @@ taste_multiplicities = {
     "45": 1,
     "i5": 3,
     "i4": 3,
-    "ij": 9,
+    "ij": 3,  # 12, 13, 23 - others cancel or are duplicates
     "4": 1,
     "i": 3,
     "id": 1,
