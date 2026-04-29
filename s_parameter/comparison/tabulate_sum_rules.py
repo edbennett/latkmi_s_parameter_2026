@@ -18,10 +18,10 @@ def get_with_attribute(data, spatial_size, temporal_size, mass, attribute):
     subset = [
         datum
         for datum in data
-        if datum["Nx"] == spatial_size
-        and datum["Ny"] == spatial_size
-        and datum["Nz"] == spatial_size
-        and datum["Nt"] == temporal_size
+        if ("Nx" not in datum or datum["Nx"] == spatial_size)
+        and ("Ny" not in datum or datum["Ny"] == spatial_size)
+        and ("Nz" not in datum or datum["Nz"] == spatial_size)
+        and ("Nt" not in datum or datum["Nt"] == temporal_size)
         and datum["mass"] == mass
         and attribute in datum
     ]

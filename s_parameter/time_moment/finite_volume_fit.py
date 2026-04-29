@@ -36,7 +36,6 @@ def get_fit_form(data):
 
 
 def get_samples(data):
-    breakpoint()
     (num_samples,) = set(len(datum["delta_fv_S_samples"]) for datum in data)
     errors = [datum["S_infinite_t_samples"].std() for datum in data]
     for sample_idx in range(num_samples):

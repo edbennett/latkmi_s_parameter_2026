@@ -1,0 +1,4 @@
+# Data from JLQCD Collaboration, Phys.Rev.Lett. 101 (2008) 242001
+m_f,value_l10_r,error_l10_r,systematic_upper_l10_r,systematic_lower_l10_r
+# Data for the chiral limit
+0.0,-0.0052,0.0002,0.0005,0.0003

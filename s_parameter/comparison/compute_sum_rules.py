@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser, FileType
+import logging
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,11 @@ def get_args():
     return parser.parse_args()
 
 
+def get_common_shape(all_samples):
+    (result,) = set(samples.shape for samples in all_samples.values())
+    return result
+
+
 def combine_samples(data):
     """
     Combine results of multiple different fits into a single dict for ease of processing.
@@ -29,10 +35,26 @@ def combine_samples(data):
 
     to_remove = []
     result = data[0]
+    if "fit_result" not in result:
+        result["fit_result"] = {}
+    if "fit_result_samples" not in result:
+        result["fit_result_samples"] = {}
+
     for datum in data[1:]:
         for key in METADATA_KEYS:
-            if result[key] != datum[key]:
+            if key in datum and key not in result:
+                result[key] = datum[key]
+            if key in datum and result[key] != datum[key]:
                 raise ValueError(f"Data mismatch: {result[key]} != {datum[key]}")
+
+        if "S_infinite_volume" in datum:
+            result["fit_result"]["S_infinite_volume"] = datum["S_infinite_volume"]
+            if "S_infinite_volume_samples" in datum:
+                result["fit_result_samples"]["S_infinite_volume"] = datum[
+                    "S_infinite_volume_samples"
+                ]
+            continue
+
         for key in datum["fit_result"]:
             if key in result["fit_result"]:
                 to_remove.append(key)
@@ -44,6 +66,16 @@ def combine_samples(data):
 
             result["fit_result"][key] = datum["fit_result"][key]
             result["fit_result_samples"][key] = datum["fit_result_samples"][key]
+
+    if (
+        "S_infinite_volume" in result["fit_result"]
+        and "S_infinite_volume" not in result["fit_result_samples"]
+    ):
+        result["fit_result_samples"]["S_infinite_volume"] = generate_jackknife(
+            *result["fit_result"]["S_infinite_volume"],
+            result,
+            get_common_shape(result["fit_result_samples"]),
+        )
 
     return result
 
@@ -159,10 +191,23 @@ def dmo(samples):
     return 2 * np.pi * (f_rho**2 / m_rho**2 - f_a_1**2 / m_a_1**2)
 
 
+def l10_r(samples, S):
+    """
+    The low energy constant $L_{10}^r$; see Eq. (55) of the paper.
+    """
+    Nf = 8  # Number of flavours
+    m_pi = samples["pi_mass"]
+    m_rho = samples["rho_mass"]
+    return -S / (16 * np.pi) - 1 / (192 * np.pi**2) * (Nf / 2) * (
+        np.log(m_pi**2 / m_rho**2) + 1
+    )
+
+
 rules = {
     "frho-fpi": lambda s: s["rho_decay_const"]
     / s["pi_decay_const"],  # TODO check normalisation
     "frho-fa1": lambda s: s["rho_decay_const"] / s["a_1_decay_const"],
+    "mpi-mrho": lambda s: s["pi_mass"] / s["rho_mass"],
     "ma1-mrho": lambda s: s["a_1_mass"] / s["rho_mass"],
     "mrho_s8t0": lambda s: s["rho_mass"] * (8 * s["t0"]) ** 0.5,
     "mpi_L": lambda s: s["pi_mass"] * s["Nx"],
@@ -173,15 +218,21 @@ rules = {
     "ksrf-i": ksrf_i,
     "ksrf-ii": ksrf_ii,
     "dmo": dmo,
+    "l10-r": lambda s: l10_r(s, s["S_infinite_volume"]),
+    "dmo-l10-r": lambda s: l10_r(s, dmo(s)),
 }
 
 
 def compute_sum_rules(data):
     result = {}
     for name, func in rules.items():
-        result[name] = jackknife_mean_variance(
-            func({**data, **data["fit_result_samples"]})
-        )
+        try:
+            result[name] = jackknife_mean_variance(
+                func({**data, **data["fit_result_samples"]})
+            )
+        except KeyError as key:
+            message = f"Key {key} not found in data. Skipping computation of {name}."
+            logging.warning(message)
 
     return result
 

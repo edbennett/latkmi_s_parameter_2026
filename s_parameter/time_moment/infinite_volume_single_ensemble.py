@@ -39,11 +39,13 @@ def get_infinite_volume_S(data, result):
         *result["fit_result"]["C"], datum, finite_volume_S.shape
     )
     # Apply Eq. (53) in reverse using fit result to get S_\infty
-    infinite_volume_S = jackknife_mean_variance(
+    infinite_volume_S_samples = (
         finite_volume_S - const_coefficient * finite_volume_factor
     )
+    infinite_volume_S = jackknife_mean_variance(infinite_volume_S_samples)
     return {
         "S_infinite_volume": infinite_volume_S,
+        "S_infinite_volume_samples": infinite_volume_S_samples,
         "method": "extrapolation",
         "mass": mass,
         "source_metadata": [{key: datum[key] for key in METADATA_KEYS}],

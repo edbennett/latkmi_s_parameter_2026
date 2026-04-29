@@ -54,6 +54,7 @@ rule compute_sum_rules:
             f"processed_data/{subdir_format}/{channel}_mass_decay.json"
             for channel in ["V", "A"]
         ],
+        infinite_volume_data=rules.infinite_volume_extrapolate.output.data,
         previous_data=config["spectrum_file"],
         script="s_parameter/comparison/compute_sum_rules.py",
     output:
@@ -61,7 +62,8 @@ rule compute_sum_rules:
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --previous_data {input.previous_data} "
+        "python -m {params.module} {input.data} {input.infinite_volume_data} "
+        "--previous_data {input.previous_data} "
         "--output_file {output.data}"
 
 
@@ -182,18 +184,18 @@ use rule simple_comparison_plot as plot_wsr with:
         plot="assets/plots/wsr_{wsr_idx}.pdf",
 
 
-rule sum_rules:
+rule tabulate_sum_rules:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=rules.simple_comparison_plot.input.data,
         script="s_parameter/comparison/tabulate_sum_rules.py",
     output:
-        plot="assets/tables/sum_rules.tex",
+        table="assets/tables/sum_rules.tex",
     conda:
         "../envs/python.yml"
     shell:
-        "python -m {params.module} {input.data} --output_file {output.plot}"
+        "python -m {params.module} {input.data} --output_file {output.table}"
 
 
 rule S_parameter_group_by_mass:
@@ -272,3 +274,38 @@ rule S_parameter_infinite_volume_comparison:
         "--time_moment_finite_volume {input.time_moment_finite_volume} "
         "--vp_momentum_finite_volume {input.vp_momentum_finite_volume} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule tabulate_l10_r:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        sum_rule_data=rules.simple_comparison_plot.input.data,
+        time_moment_data=rules.S_parameter_infinite_volume_comparison.input.time_moment_infinite_volume,
+        script="s_parameter/comparison/tabulate_dmo_l10r.py",
+    output:
+        table="assets/tables/dmo_l10_r.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.sum_rule_data} {input.time_moment_data} "
+        "--output_file {output.table}"
+
+
+rule plot_l10_r:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.simple_comparison_plot.input.data,
+        jlqcd_data="external_data/jlqcd_prl08_l10_r.csv",
+        rbc_ukqcd_data="external_data/rbc_ukqcd_prd10_l10_r.csv",
+        plot_styles=config["plot_styles"],
+        script="s_parameter/comparison/plot_l10_r.py",
+    output:
+        plot="assets/plots/l10_r.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--jlqcd_data {input.jlqcd_data} --rbc_ukqcd_data {input.rbc_ukqcd_data} "
+        "--output_file {output.plot} --plot_styles {input.plot_styles}"
