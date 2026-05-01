@@ -21,7 +21,8 @@ def get_args():
 
 
 def plot_single_fit(ax, data, label, colour):
-    time, s_eff, s_eff_error = data
+    time = data["times"]
+    s_eff, s_eff_error = data["S_effective"]
     ax.fill_between(
         time,
         s_eff + s_eff_error,
@@ -53,13 +54,15 @@ def plot(data, fit_result):
     ax.set_ylabel(r"$\overline{S}(\overline{t})$")
 
     plot_single_data(ax, data["Conserved"]["S_parameter_eff"], "Data", "C0")
-    plot_single_fit(ax, fit_result["S_interpolation"], "Fit", "C1")
+    plot_single_fit(ax, fit_result["S_correlator_interpolation"], "Fit", "C1")
     plot_single_fit(
         ax, fit_result["S_extrapolation_large_t"], r"$T \rightarrow \infty$", "C2"
     )
 
+    ax.set_xlim(0, data["Nt"])
     ax.set_ylim(0, 0.3)
     ax.legend(loc="best")
+    ax.grid()
 
     return fig
 

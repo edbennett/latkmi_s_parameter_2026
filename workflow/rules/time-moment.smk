@@ -118,15 +118,62 @@ rule meson_table:
         "python -m {params.module} {input.data} --output_file {output.plot}"
 
 
+rule reconstruct_mass_samples:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        script="s_parameter/time_moment/reconstruct_mass_samples.py",
+        datum=lambda wildcards: rules.meson_v_a.output.data.format(channel="V", **wildcards),
+        spectrum_data=config["spectrum_file"],
+    output:
+        data=f"processed_data/{subdir_format}/reconstructed_mass_samples.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.datum} --spectrum_data {input.spectrum_data} "
+        "--output_file {output.data}"
+
+
+def only_if_metadata(column, filename, from_df=metadata):
+    def only_if_metadata_inner(wildcards):
+        (required,) = lookup(
+            within=from_df,
+            query=metadata_query.format(**wildcards),
+            cols=column,
+        )
+        if required:
+            return filename.format(**wildcards)
+        return []
+
+    return only_if_metadata_inner
+
+
 rule S_parameter_tm_fit:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         plateau_start=get_metadata("plateau_start_va"),
         plateau_end=get_metadata("plateau_end_va"),
+        rho_vt_flag=lambda wildcards, input: (
+            f"--m_rho_vt_samples {input.rho_vt_samples}"
+            if input.rho_vt_samples
+            else ""
+        ),
+        a_1_flag=lambda wildcards, input: (
+            f"--m_a_1_samples {input.a_1_samples}"
+            if input.a_1_samples
+            else ""
+        ),
     input:
         data=rules.S_parameter_tm_small_t.output.data,
-        m_rho=f"processed_data/{subdir_format}/V_mass_decay.json",
-        m_a_1=f"processed_data/{subdir_format}/A_mass_decay.json",
+        rho_vt_samples=only_if_metadata(
+            "use_VT_timemoment",
+            f"processed_data/{subdir_format}/V_mass_decay.json"
+        ),
+        a_1_samples=only_if_metadata(
+            "use_VT_timemoment",
+            f"processed_data/{subdir_format}/A_mass_decay.json"
+        ),
+        mass_samples=rules.reconstruct_mass_samples.output.data,
         script="s_parameter/time_moment/sparam_fit.py",
     output:
         data=f"processed_data/{subdir_format}/s_parameter_tm_fit.json",
@@ -134,7 +181,8 @@ rule S_parameter_tm_fit:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} "
-        "--input_m_rho {input.m_rho} --input_m_a_1 {input.m_a_1} "
+        "--input_mass_samples {input.mass_samples} "
+        "{params.rho_vt_flag} {params.a_1_flag} "
         "--min_timeslice {params.plateau_start} --max_timeslice {params.plateau_end} "
         "--output_file {output.data}"
 

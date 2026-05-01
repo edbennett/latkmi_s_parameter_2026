@@ -16,11 +16,11 @@ def get_args():
     return parser.parse_args()
 
 
-def compute_S_parameter_small_t(correlator):
+def compute_S_parameter_contribution(correlator, start_time=0):
     """
     Given the folded, zero-momentum projected V-A correlator,
     or jackknife samples thereof,
-    compute the S parameter.
+    compute the contribution of each correlator point to the S parameter.
 
     C.f. Eq. (20) of the paper,
     but we do not yet perform the summation.
@@ -35,10 +35,10 @@ def compute_S_parameter_small_t(correlator):
     normalisation_factor = 4.0 * np.pi / 4.0
 
     moment_index = 1
-    times = np.arange(correlator.shape[-1])
+    times = start_time + np.arange(correlator.shape[-1])
     return (
         normalisation_factor
-        * (-(1**moment_index))
+        * ((-1) ** moment_index)
         / gamma(2 * moment_index + 1)
         * times ** (2 * moment_index)
         * correlator
@@ -58,7 +58,7 @@ def get_S_parameter(data):
         }
 
         # Contribution to the total S parameter from each time slice
-        S_parameter_contrib = compute_S_parameter_small_t(v_minus_a)
+        S_parameter_contrib = compute_S_parameter_contribution(v_minus_a)
         result["S_parameter_contrib_samples"] = S_parameter_contrib
         result["S_parameter_contrib"] = jackknife_mean_variance(S_parameter_contrib)
 

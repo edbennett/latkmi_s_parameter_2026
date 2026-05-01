@@ -6,6 +6,7 @@ from functools import partial
 import numpy as np
 from scipy.optimize import curve_fit
 
+from .sparam_tm import compute_S_parameter_contribution
 from ..io import read_numpy, dump_numpy
 from ..stats import (
     jackknife_mean_variance,
@@ -17,23 +18,25 @@ from ..stats import (
 def get_args():
     parser = ArgumentParser()
     parser.add_argument("input_file", metavar="input_file")
-    parser.add_argument("--input_m_rho", required=True)
-    parser.add_argument("--input_m_a_1", required=True)
+    parser.add_argument("--input_mass_samples", required=True)
     parser.add_argument("--min_timeslice", type=int, default=0)
     parser.add_argument("--max_timeslice", type=int, default=None)
+    parser.add_argument("--m_rho_vt_samples", default=None)
+    parser.add_argument("--m_a_1_samples", default=None)
     parser.add_argument("--output_file", type=FileType("w"), default="-")
     return parser.parse_args()
 
 
-def fit_form(time, C_A_plus, C_A_minus, C_V_plus, C_V_minus, m_a_1, m_rho, max_time):
+def fit_form(time, C_A_plus, C_A_minus, C_V_plus, C_V_minus, m_rho, m_a_1, max_time):
     """
     Fit form described in Eq. (26) of the paper.
     `time` is expected to be an integer.
     The four `C_` parameters are the fit parameters.
-    `m_a_1` and `m_rho` are the masses of the a1 and rho meson,
-    and should be preset using `partial` or similar.
+    `m_rho` and `m_a_1` are the masses of the rho and a_1 meson,
+    and should be preset using `partial` or similar for fitting.
     `max_time` is the value $T$ from the paper,
-    and should be preset using `partial` or similar.
+    and should be preset using `partial` or similar for fitting.
+    `max_time = None` corresponds to the infinite $T$ limit.
     """
     return (C_V_plus - (-1) ** time * C_A_plus) * (
         np.exp(-m_rho * time)
@@ -44,7 +47,7 @@ def fit_form(time, C_A_plus, C_A_minus, C_V_plus, C_V_minus, m_a_1, m_rho, max_t
     )
 
 
-def correlator_infinite_t_I(mass, t0):
+def correlator_infinite_t_I(t0, mass):
     """
     Extrapolate the forward correlator,
     implementing  Eq. (29) of the paper.
@@ -80,7 +83,7 @@ def correlator_infinite_t_J(t0, mass):
 def extrapolate_S_infinite_t(fit_samples, m_rho, m_a_1, t_0, S_t_0):
     """
     Take a jackknife sample set of fit results,
-    and apply Eq. (27) of the paper to obtain
+    and apply Eq. (27)/(28) of the paper to obtain
     the extrapolated S parameter at infinite T.
     fit_samples: The fit results for the four parameters C_{+,-}^{V,A}
     m_rho, m_a_1: Samples of the masses of the rho and a_1 states
@@ -91,19 +94,18 @@ def extrapolate_S_infinite_t(fit_samples, m_rho, m_a_1, t_0, S_t_0):
     # Take transpose to match shape of fit_samples: (samples, parameters)
     factors = np.array(
         [
-            correlator_infinite_t_I(t_0, m_rho),
-            -correlator_infinite_t_I(t_0, m_a_1),
             -correlator_infinite_t_J(t_0, m_rho),
-            correlator_infinite_t_I(t_0, m_a_1),
+            -correlator_infinite_t_I(t_0, m_a_1),
+            correlator_infinite_t_I(t_0, m_rho),
+            correlator_infinite_t_J(t_0, m_a_1),
         ]
     ).T
-
     # Eq. (28) uses 4pi * (-1/2!); this is simplified to -2pi here.
-    contributions = -2 * np.pi * (fit_samples * factors)
+    contributions = np.pi / 2 * (fit_samples * factors)
     result = {
         f"S_{name}": (value, error)
         for name, value, error in zip(
-            ["V_plus", "A_minus", "A_plus", "V_minus"],
+            ["A_plus", "A_minus", "V_plus", "V_minus"],
             *jackknife_mean_variance(contributions),
         )
     }
@@ -125,27 +127,36 @@ def extrapolate_S_finite_t(fit_samples, m_rho, m_a_1, t_0, t_max, S_t_0):
 
     # Desired axis ordering:
     # bootstrap sample, contribution (rho/a1; A/V), time
-    factors = np.cumsum(
-        np.array([1, 1, -1, -1])[:, np.newaxis] ** times
-        * times**2
-        * np.exp(-masses.T[:, :, np.newaxis] * times),
-        axis=2,
+    factors = (
+        np.cumsum(
+            np.array([-1, 1, 1, -1])[:, np.newaxis] ** times
+            * times**2
+            * np.exp(-masses.T[:, :, np.newaxis] * times),
+            axis=2,
+        )
+        * np.array([-1, -1, 1, 1])[:, np.newaxis]
     )
-    S_eff_samples = S_t_0[:, np.newaxis] - 2 * np.pi * (
+    S_eff_samples = S_t_0[:, np.newaxis] + np.pi / 2 * (
         fit_samples[..., np.newaxis] * factors
     ).sum(axis=1)
-    return [times, *jackknife_mean_variance(S_eff_samples)]
+    return {
+        "times": times,
+        "S_effective": jackknife_mean_variance(S_eff_samples),
+    }
 
 
-def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, S_t_0):
+def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, max_time, S_t_0):
     """
     Take a jackknife sample set of fit results,
     and apply Eq. (22) of the paper
     to obtain the interpolated effective S parameter as a function of T.
     """
     times = np.arange(t_0, t_1)[:, np.newaxis]
-    correlator = fit_form(times, *(np.array(fit_samples).T), m_a_1, m_rho, t_1 - 1).T
-    S_eff_samples = (S_t_0 + np.cumsum(-2 * np.pi * times**2 * correlator.T, axis=0)).T
+    correlator = fit_form(times, *(np.array(fit_samples).T), m_rho, m_a_1, max_time).T
+
+    S_eff_samples = (
+        S_t_0 - np.cumsum(compute_S_parameter_contribution(correlator, t_0), axis=1).T
+    ).T
     return {
         "times": times[:, 0],
         "correlator": jackknife_mean_variance(correlator),
@@ -222,13 +233,28 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
 
     fit_samples = full_range_result["fit_result_samples"]
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
-        :, min_timeslice
+        :, min_timeslice - 1
     ]
     full_range_result["S_extrapolation_large_t"] = extrapolate_S_finite_t(
         fit_samples, m_rho, m_a_1, min_timeslice, full_data["Nt"], start_S_samples
     )
     full_range_result["S_correlator_interpolation"] = interpolate_correlator_and_S(
-        fit_samples, m_rho, m_a_1, min_timeslice, max_timeslice, start_S_samples
+        fit_samples,
+        m_rho,
+        m_a_1,
+        min_timeslice,
+        max_timeslice,
+        full_data["Nt"],
+        start_S_samples,
+    )
+    full_range_result["S_correlator_extrapolation"] = interpolate_correlator_and_S(
+        fit_samples,
+        m_rho,
+        m_a_1,
+        min_timeslice,
+        full_data["Nt"] + 1,
+        None,
+        start_S_samples,
     )
 
     return full_range_result
@@ -245,13 +271,19 @@ def main():
     args = get_args()
     data = read_numpy(args.input_file)
 
-    m_rho_data = read_numpy(args.input_m_rho)
-    m_a_1_data = read_numpy(args.input_m_a_1)
+    mass_data = read_numpy(args.input_mass_samples)
+    m_rho_data = mass_data["rho_mass"]
+    m_a_1_data = mass_data["a_1_mass"]
+    if args.m_rho_vt_samples:
+        m_rho_data = read_numpy(args.m_rho_vt_samples)["fit_result_samples"]["rho_mass"]
+    if args.m_a_1_samples:
+        m_a_1_data = read_numpy(args.m_a_1_samples)["fit_result_samples"]["a_1_mass"]
+
     max_timeslice = get_max_timeslice(data, args.max_timeslice)
     result = fit(
         data,
-        m_rho_data["fit_result_samples"]["rho_mass"],
-        m_a_1_data["fit_result_samples"]["a_1_mass"],
+        m_rho_data,
+        m_a_1_data,
         args.min_timeslice,
         max_timeslice,
     )
@@ -259,8 +291,8 @@ def main():
         {
             **result,
             **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]},
-            "m_rho": m_rho_data["fit_result"]["rho_mass"],
-            "m_a_1": m_a_1_data["fit_result"]["a_1_mass"],
+            "m_rho": m_rho_data,
+            "m_a_1": m_a_1_data,
             "min_timeslice": args.min_timeslice,
             "max_timeslice": max_timeslice,
         },

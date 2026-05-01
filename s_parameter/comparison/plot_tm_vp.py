@@ -42,7 +42,7 @@ def plot_single_series(ax, data, secondary_data, key, props):
     sizes = reversed(sorted(set(datum["Nx"] for datum in data)))
     for size in sizes:
         subset = [datum for datum in data if datum["Nx"] == size]
-        mass_offset = 0.002 if secondary_data else 0
+        mass_offset = 0.001 if secondary_data else 0
         masses = [datum["mass"] + mass_offset for datum in subset]
 
         results = np.array([nested_get(datum, key) for datum in subset])

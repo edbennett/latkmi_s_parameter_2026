@@ -18,13 +18,14 @@ def get_args():
     return parser.parse_args()
 
 
-def plot_fit(ax, fit_result, colour="C0", label="Fit"):
-    single_result = fit_result["S_correlator_interpolation"]
-    correlator_fit, correlator_fit_error = single_result["correlator"]
+def plot_fit(ax, fit_result, colour="C0", label="Fit", max_timeslice=np.inf):
+    times = fit_result["times"]
+    subset = times <= max_timeslice
+    correlator_fit, correlator_fit_error = fit_result["correlator"]
     ax.fill_between(
-        single_result["times"],
-        correlator_fit - correlator_fit_error,
-        correlator_fit + correlator_fit_error,
+        times[subset],
+        (correlator_fit - correlator_fit_error)[subset],
+        (correlator_fit + correlator_fit_error)[subset],
         color=colour,
         label=label,
         alpha=0.5,
@@ -46,14 +47,21 @@ def plot(data, fit_result):
         marker="s",
         linestyle="none",
         label="Data",
-        color="C2",
+        color="C0",
     )
 
     num_timeslices = data["Conserved"]["V-A_renormalised"].shape[-1] - 1
     max_timeslice = 5 * num_timeslices / 4
-    # plot_fit(ax, fit_result, "C1", r"$T\rightarrow\infty$", max_timeslice=max_timeslice)
-    plot_fit(ax, fit_result, "C0", "Fit")
+    plot_fit(
+        ax,
+        fit_result["S_correlator_extrapolation"],
+        "C2",
+        r"$T\rightarrow\infty$",
+        max_timeslice,
+    )
+    plot_fit(ax, fit_result["S_correlator_interpolation"], "C1", "Fit", max_timeslice)
     ax.set_xlim(None, max_timeslice)
+    ax.set_ylim(None, None)
 
     ax.legend(loc="best")
     return fig

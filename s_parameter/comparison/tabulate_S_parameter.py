@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser, FileType
-from functools import partial
 
 from format_multiple_errors import format_multiple_errors
+import numpy as np
 
 from ..io import read_numpy
 
@@ -29,7 +29,6 @@ def get_with_attribute(data, spatial_size, temporal_size, mass, attribute):
     if len(subset) == 0:
         raise ValueError("Datum not found")
     if len(subset) > 1:
-        breakpoint()
         raise ValueError("Multiple results found")
     return subset[0]
 
@@ -42,16 +41,22 @@ def get_row(data, spatial_size, temporal_size, mass):
         data, spatial_size, temporal_size, mass, "S_infinite_t"
     )
 
-    formatter = partial(
-        format_multiple_errors,
-        abbreviate=True,
-        length_control="central",
-        significant_figures=3,
-    )
+    def formatter(value_and_errors):
+        if None in value_and_errors:
+            return "---"
+        if np.isnan(value_and_errors).any():
+            return "nan"
+        return format_multiple_errors(
+            *value_and_errors,
+            abbreviate=True,
+            length_control="central",
+            significant_figures=3,
+        )
+
     vacuum_polarisation_S = formatter(
-        *vacuum_polarisation_datum["pade_fit_result"]["Conserved"]["S"]
+        vacuum_polarisation_datum["pade_fit_result"]["Conserved"]["S"]
     )
-    time_moment_S = formatter(*time_moment_datum["S_infinite_t"])
+    time_moment_S = formatter(time_moment_datum["S_infinite_t"])
 
     row_data = [spatial_size, temporal_size, mass, vacuum_polarisation_S, time_moment_S]
     return " & ".join(map(str, row_data)) + r" \\"
