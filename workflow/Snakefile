@@ -52,6 +52,7 @@ comparison_plots = [
     "S_parameter_infinite_volume_comparison",
     "l10_r",
 ]
+meta_plots = ["pv_spectrum"]
 tables = [
     "S_parameter",
     "sum_rules",
@@ -65,7 +66,7 @@ rule all:
     input:
         plots=expand(
             "assets/plots/{plot_name}.pdf", plot_name=(
-                vp_momentum_plots + time_moment_plots + comparison_plots
+                vp_momentum_plots + time_moment_plots + comparison_plots + meta_plots
             ),
         ),
         tables=expand("assets/tables/{table_name}.tex", table_name=tables),
