@@ -29,7 +29,7 @@ def tabulate(data):
         assert datum["Nx"] == datum["Ny"] and datum["Nx"] == datum["Nz"]
         structured_datum["$L$"] = datum["Nx"]
         structured_datum["$T$"] = datum["Nt"]
-        structured_datum["$m_f$"] = datum["mass"]
+        structured_datum["$m_f$"] = str(datum["mass"])
         for channel, channel_label in [("rho", r"\rho"), ("a_1", "a_1")]:
             for observable, observable_label in [("mass", "M"), ("decay_const", "F")]:
                 target_key = f"{channel}_{observable}"

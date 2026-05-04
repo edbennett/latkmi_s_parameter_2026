@@ -5,10 +5,10 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..io import read_numpy_optional
+from ..io import read_numpy, read_numpy_optional
 from ..plot import Props, save_or_show
 from .pade import get_momentum_filter
-from .plot_vpf import read, plot_fit_result
+from .plot_vpf import plot_fit_result
 
 
 def get_args():
@@ -58,7 +58,7 @@ def plot(data=[], fit_results=[], Z_A=None, q_squared_upper_bound=None):
     props = Props()
 
     for fit_result in fit_results:
-        plot_single_fit(ax, fit_result, props, Z_A["central"]["Z_A_0"][0])
+        plot_single_fit(ax, fit_result, props, Z_A["central"]["Z_A_0"][0] if Z_A else 1)
 
     for datum in data:
         plot_single_datum(ax, datum, props, Z_A)
@@ -75,8 +75,8 @@ def plot(data=[], fit_results=[], Z_A=None, q_squared_upper_bound=None):
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
-    data = [read(input_file) for input_file in args.input_files]
-    fit_results = [read(fit_result) for fit_result in args.fit_results]
+    data = [read_numpy(input_file) for input_file in args.input_files]
+    fit_results = [read_numpy(fit_result) for fit_result in args.fit_results]
     Z_A = read_numpy_optional(args.Z_A)
 
     fig = plot(

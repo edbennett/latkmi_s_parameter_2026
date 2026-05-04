@@ -62,7 +62,6 @@ def plot(data, fit_result):
     ax.set_xlim(0, data["Nt"])
     ax.set_ylim(0, 0.3)
     ax.legend(loc="best")
-    ax.grid()
 
     return fig
 

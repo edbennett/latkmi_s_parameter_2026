@@ -72,4 +72,4 @@ def plot(new_data, old_data):
 
 
 if __name__ == "__main__":
-    comparison_plot_main(plot)
+    comparison_plot_main(plot, old_data=True)

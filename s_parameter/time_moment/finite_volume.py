@@ -60,9 +60,11 @@ class EnsembleManager:
         self._datum = datum
         self._samples = {}
 
-        result = spectrum.query(f"Nf == 8 & beta == 3.8 & mf == {datum['mass']}")
-        if len(result) != 1:
-            raise ValueError("Unique ensemble not found.")
+        result = spectrum.query(
+            f"Nf == 8 & beta == 3.8 & mf == {datum['mass']}"
+        ).sort_values(by="L", ascending=False)
+        if len(result) == 0:
+            raise ValueError("Ensemble not found.")
         self._spectrum = result.iloc[0]
 
     @property
