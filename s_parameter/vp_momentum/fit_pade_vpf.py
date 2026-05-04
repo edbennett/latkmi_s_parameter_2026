@@ -49,9 +49,14 @@ def fit_samples_pade(momentum_squared, vpf_samples):
         [fit_single_pade(momentum_squared, sample) for sample in vpf_samples]
     )
     fit_values, fit_errors = jackknife_mean_variance(result_samples)
-    chisquare = (
-        ((pade(momentum_squared, *fit_values) - vpf_values) / vpf_errors) ** 2
-    ).sum()
+    chisquare_samples = (
+        (
+            (pade(momentum_squared[:, np.newaxis], *result_samples.T).T - vpf_values)
+            / vpf_errors
+        )
+        ** 2
+    ).sum(axis=1)
+    chisquare = jackknife_mean_variance(chisquare_samples)
     b0, b1, c1, c2 = zip(fit_values, fit_errors)
 
     return {
@@ -60,6 +65,7 @@ def fit_samples_pade(momentum_squared, vpf_samples):
         "b1": b1,
         "c1": c1,
         "c2": c2,
+        "chisquare_samples": chisquare_samples,
         "chisquare": chisquare,
         "dof": len(vpf_samples) - 4,
         "S": get_s_parameter(result_samples),

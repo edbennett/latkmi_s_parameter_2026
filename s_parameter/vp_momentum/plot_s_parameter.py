@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..plot import save_or_show
-from ..io import read_numpy, read_numpy_optional
+from ..io import read_numpy
 
 
 colours_markers = {
@@ -22,17 +22,23 @@ colours_markers = {
 def get_args():
     parser = ArgumentParser()
     parser.add_argument("input_files", nargs="+", metavar="input_file")
-    parser.add_argument("--Z_A", default=None)
     parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
     parser.add_argument("--output_file", default=None)
     return parser.parse_args()
 
 
 def plot_single_series(
-    ax, data, Z_A, offset, lattice_size, upper_bound, colour, fillstyle, label_suffix
+    ax,
+    data,
+    offset,
+    lattice_size,
+    upper_bound,
+    colour,
+    fillstyle,
+    label_suffix,
+    datum_getter,
 ):
     default_colour, marker = colours_markers[lattice_size]
-    Z_A_value, Z_A_error = Z_A
     volume_data = [
         datum
         for datum in data
@@ -43,20 +49,11 @@ def plot_single_series(
         for datum in volume_data
     )
     masses = [datum["mass"] + offset for datum in volume_data]
-    bare_s_parameter, bare_s_parameter_error = map(
-        np.array,
-        zip(*[datum["pade_fit_result"]["Conserved"]["S"] for datum in volume_data]),
-    )
-    s_parameter = bare_s_parameter * Z_A_value
-    s_parameter_error = (
-        s_parameter
-        * ((bare_s_parameter_error / s_parameter) ** 2 + (Z_A_error / Z_A_value) ** 2)
-        ** 0.5
-    )
+    value, error = map(np.array, zip(*[datum_getter(datum) for datum in volume_data]))
     ax.errorbar(
         masses,
-        s_parameter,
-        yerr=s_parameter_error,
+        value,
+        yerr=error,
         marker=marker,
         linestyle="none",
         label=None if label_suffix is None else f"$L = {lattice_size}${label_suffix}",
@@ -65,13 +62,17 @@ def plot_single_series(
     )
 
 
+def get_S(datum):
+    return datum["pade_fit_result"]["Conserved"]["S"]
+
+
 def get_suffix(upper_bound_key):
     if upper_bound_key.isdigit():
         return f", $q^2 < {upper_bound_key}$"
     return rf", $q^2 < q^2_{{\mathrm{{{upper_bound_key}}}}}$"
 
 
-def plot(data, Z_A):
+def plot(data, datum_getter, ylabel, ylim, yscale):
     fig, ax = plt.subplots()
     upper_bounds = sorted(set(datum["upper_bound"] for datum in data))
     lattice_sizes = reversed(sorted(set(datum["Nx"] for datum in data)))
@@ -91,38 +92,38 @@ def plot(data, Z_A):
             plot_single_series(
                 ax,
                 data,
-                Z_A,
                 offset,
                 lattice_size,
                 upper_bound,
                 colour,
                 fillstyle,
                 label_suffix,
+                datum_getter,
             )
 
     ax.set_xlabel("$am_f$")
-    ax.set_ylabel(r"$S|_{\textnormal{1-doublet}}$")
+    ax.set_ylabel(ylabel)
+    ax.set_yscale(yscale)
     ax.legend(loc="best")
 
     if ax.get_xlim()[0] < 0.03:
         ax.set_xlim(0, None)
     if len(upper_bounds) > 1:
-        ax.set_ylim(0.2, 0.3)
+        ax.set_ylim(ylim)
     else:
         ax.set_ylim(0, 0.35)
 
     return fig
 
 
-def main():
+def main(datum_getter, ylabel, ylim, yscale="linear"):
     args = get_args()
     plt.style.use(args.plot_styles)
     data = [read_numpy(filename) for filename in args.input_files]
-    Z_A = read_numpy_optional(args.Z_A)
 
-    fig = plot(data, Z_A["central"]["Z_A_0"] if Z_A else (1, 0))
+    fig = plot(data, datum_getter, ylabel, ylim, yscale)
     save_or_show(fig, args.output_file)
 
 
 if __name__ == "__main__":
-    main()
+    main(get_S, r"$S|_{\textnormal{1-doublet}}$", (0.2, 0.3))

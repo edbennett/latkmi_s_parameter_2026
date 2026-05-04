@@ -233,10 +233,10 @@ rule plot_fit_range_comparison_large_volume:
             for upper_bound in ["max2", "max3"]
             if metadatum["Nx"] >= 24
         },
-        script="s_parameter/vp_momentum/plot_s_parameter.py",
+        script="s_parameter/vp_momentum/plot_s_parameter{target}.py",
         plot_styles=config["plot_styles"],
     output:
-        plot="assets/plots/S_parameter_mf_fit_range_large.pdf",
+        plot="assets/plots/S_parameter{target}_mf_fit_range_large.pdf",
     conda:
         "../envs/python.yml"
     shell:
@@ -256,10 +256,10 @@ rule plot_fit_range_comparison_small_volume:
             for upper_bound in ["1", "max2", "max3"]
             if metadatum["Nx"] == 18
         },
-        script="s_parameter/vp_momentum/plot_s_parameter.py",
+        script="s_parameter/vp_momentum/plot_s_parameter{target}.py",
         plot_styles=config["plot_styles"],
     output:
-        plot="assets/plots/S_parameter_mf_fit_range_small.pdf",
+        plot="assets/plots/S_parameter{target}_mf_fit_range_small.pdf",
     conda:
         "../envs/python.yml"
     shell:

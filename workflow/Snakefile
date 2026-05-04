@@ -27,6 +27,8 @@ vp_momentum_plots = [
     "S_parameter_mf",
     "S_parameter_mf_fit_range_small",
     "S_parameter_mf_fit_range_large",
+    "S_parameter_chisquare_mf_fit_range_small",
+    "S_parameter_chisquare_mf_fit_range_large",
     "vpf_Nf8_mf0.015_42x42x42x56",
     "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
     "S_extrapolation_Nf8_mf0.015_42x42x42x56",
