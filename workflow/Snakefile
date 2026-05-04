@@ -12,6 +12,7 @@ def get_metadata(column, from_df=metadata):
 
     return get_metadata_inner
 
+include: "rules/meta.smk"
 include: "rules/za.smk"
 include: "rules/vp-momentum.smk"
 include: "rules/time-moment.smk"
@@ -56,6 +57,8 @@ tables = [
     "sum_rules",
     "spectrum",
     "dmo_l10_r",
+    "ensembles",
+    "quoted_spectrum",
 ]
 
 rule all:

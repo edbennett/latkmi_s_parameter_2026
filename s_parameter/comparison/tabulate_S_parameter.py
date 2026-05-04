@@ -2,10 +2,9 @@
 
 from argparse import ArgumentParser, FileType
 
-from format_multiple_errors import format_multiple_errors
-import numpy as np
 
 from ..io import read_numpy
+from ..tables import formatter
 
 
 def get_args():
@@ -40,18 +39,6 @@ def get_row(data, spatial_size, temporal_size, mass):
     time_moment_datum = get_with_attribute(
         data, spatial_size, temporal_size, mass, "S_infinite_t"
     )
-
-    def formatter(value_and_errors):
-        if None in value_and_errors:
-            return "---"
-        if np.isnan(value_and_errors).any():
-            return "nan"
-        return format_multiple_errors(
-            *value_and_errors,
-            abbreviate=True,
-            length_control="central",
-            significant_figures=3,
-        )
 
     vacuum_polarisation_S = formatter(
         vacuum_polarisation_datum["pade_fit_result"]["Conserved"]["S"]
