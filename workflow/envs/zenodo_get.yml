@@ -1,0 +1,37 @@
+name: zenodo-get
+channels:
+  - conda-forge
+dependencies:
+  - bzip2=1.0.8
+  - ca-certificates=2026.1.4
+  - icu=78.2
+  - libexpat=2.7.4
+  - libffi=3.5.2
+  - liblzma=5.8.2
+  - libmpdec=4.0.0
+  - libsqlite=3.51.2
+  - libzlib=1.3.1
+  - ncurses=6.5
+  - openssl=3.6.1
+  - pip=26.0.1
+  - python=3.14.3
+  - python_abi=3.14
+  - readline=8.3
+  - tk=8.6.13
+  - tzdata=2025c
+  - zstd=1.5.7
+  - pip:
+      - anyio==4.12.1
+      - certifi==2026.1.4
+      - click==8.3.1
+      - coverage==7.13.4
+      - h11==0.16.0
+      - httpcore==1.0.9
+      - httpx==0.28.1
+      - httpx-retries==0.4.6
+      - humanize==4.15.0
+      - idna==3.11
+      - loguru==0.7.3
+      - tqdm==4.67.3
+      - zenodo-get==3.0.0
+prefix: /opt/homebrew/Caskroom/miniconda/base/envs/zenodo-get

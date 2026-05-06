@@ -330,3 +330,38 @@ rule compute_lsd_infinite_volume:
         "--s_parameter_data {input.lsd_s_data} --chiral_data {input.lsd_chiral_data} "
         "--fit_result {input.fit_result} "
         "--output_file {output.data}"
+
+
+rule get_previous_fit_results:
+    output:
+        data="previous_data/fit_results_2505.08658.csv",
+    conda:
+        "../envs/zenodo_get.yml"
+    shadow: "minimal"
+    shell:
+        """
+        zenodo_get --doi https://doi.org/10.5281/zenodo.17037868 --glob fit_results.csv
+        mv fit_results.csv {output.data}
+        """
+
+
+rule plot_lsd_infinite_volume:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        time_moment_data=rules.S_parameter_infinite_volume_comparison.input.time_moment_infinite_volume,
+        chiral_data=rules.get_previous_fit_results.output.data,
+        spectrum_data=config["spectrum_file"],
+        lsd_data=rules.compute_lsd_infinite_volume.output.data,
+        plot_styles=config["plot_styles"],
+        script="s_parameter/comparison/plot_infinite_volume_S_lsd.py",
+    output:
+        plot="assets/plots/S_infinite_volume_lsd.pdf",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} "
+        "--time_moment_infinite_volume {input.time_moment_data} "
+        "--spectrum_data {input.spectrum_data} --chiral_fit_result {input.chiral_data} "
+        "--lsd_data {input.lsd_data} "
+        "--plot_styles {input.plot_styles} --output_file {output.plot}"
