@@ -309,3 +309,24 @@ rule plot_l10_r:
         "python -m {params.module} {input.data} "
         "--jlqcd_data {input.jlqcd_data} --rbc_ukqcd_data {input.rbc_ukqcd_data} "
         "--output_file {output.plot} --plot_styles {input.plot_styles}"
+
+
+rule compute_lsd_infinite_volume:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        lsd_s_data="external_data/lsd_prd14_spectra_sparameter_table_6.csv",
+        lsd_chiral_data="external_data/lsd_prd14_spectra_chiral_limit_table_3_9.csv",
+        fit_result=rules.finite_volume_fit.output.data,
+        script="s_parameter/comparison/lsd_infinite_volume.py",
+    # This is a slow process due to computing all finite volume factors at once
+    priority: 50
+    output:
+        data="processed_data/lsd_infinite_volume.csv",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} "
+        "--s_parameter_data {input.lsd_s_data} --chiral_data {input.lsd_chiral_data} "
+        "--fit_result {input.fit_result} "
+        "--output_file {output.data}"

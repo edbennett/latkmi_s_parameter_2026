@@ -1,0 +1,7 @@
+# Data from Phys. Rev. D 90, 114502, tables III and IX
+# fpi0 er_sta er_sys (Factor sqrt(2.0) should multiplied for comparing with LatKMI, er_sys = 0.019 - 0.017)
+# mrho0 er_sta er_sys (No factor sqrt(2.0) needed for comparing with LatKMI, er_sys = 0.171 - 0.164)
+Nf,beta,value_mres,error_mres,value_Z_A,error_Z_A,value_rho_mass,error_rho_mass,systematic_error_rho_mass,value_n0,error_n0,value_pi_decay_const,error_pi_decay_const,systematic_error_pi_mass
+2,2.7,0.0000263,0.0000001,0.85042,0.00008,0.2166,0.027,,0.2984,0.0064,,,
+6,2.1,0.0008278,0.0000022,0.72615,0.00007,0.1991,0.0033,,0.2425,0.0095,,,
+8,1.95,0.0026836,0.0000062,0.70011,0.0001,0.171,0.0036,0.007,0.2441,0.0054,0.017,0.001,0.002
