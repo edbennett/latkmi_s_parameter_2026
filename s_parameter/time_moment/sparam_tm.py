@@ -80,7 +80,10 @@ def main():
     dump_numpy(
         {
             **result,
-            **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]},
+            **{
+                key: data[key]
+                for key in ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
+            },
         },
         args.output_file,
     )

@@ -63,7 +63,7 @@ def main():
             **result,
             **{
                 key: match_datum[key]
-                for key in ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+                for key in ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
             },
             "source": args.spectrum_data,
         },

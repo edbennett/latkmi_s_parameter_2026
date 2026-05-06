@@ -5,6 +5,7 @@ rule extract_vv_aa:
         Nx=get_metadata("Nx"),
         Ny=get_metadata("Ny"),
         Nz=get_metadata("Nz"),
+        Nf=get_metadata("Nf"),
     input:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_correlators.py",
@@ -15,6 +16,7 @@ rule extract_vv_aa:
     shell:
         "python -m {params.module} {input.data} --output {output.data} "
         "--Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz} "
+        "--Nf {params.Nf} "
         + " ".join(
             f"--source OneLinkCurrent{channel}{index}"
             for channel in ["V", "A"]
@@ -34,6 +36,7 @@ rule extract_pbp:
         Nx=get_metadata("Nx"),
         Ny=get_metadata("Ny"),
         Nz=get_metadata("Nz"),
+        Nf=get_metadata("Nf"),
     input:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_correlators.py",
@@ -44,7 +47,7 @@ rule extract_pbp:
     shell:
         "python -m {params.module} {input.data} --output {output.data} "
         "--Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz} "
-        "--sink 1LPBP --source OneLinkCurrent"
+        "--Nf {params.Nf} --sink 1LPBP --source OneLinkCurrent"
 
 
 rule extract_momentum_currents:
@@ -54,6 +57,7 @@ rule extract_momentum_currents:
         Nx=get_metadata("Nx"),
         Ny=get_metadata("Ny"),
         Nz=get_metadata("Nz"),
+        Nf=get_metadata("Nf"),
     input:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_momentum_correlators.py",
@@ -63,7 +67,8 @@ rule extract_momentum_currents:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} --output {output.data} "
-        "--Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz}"
+        "--Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz} "
+        "--Nf {params.Nf}"
 
 
 rule VPF:

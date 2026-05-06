@@ -5,6 +5,7 @@ rule extract_av:
         Nx=get_metadata("Nx"),
         Ny=get_metadata("Ny"),
         Nz=get_metadata("Nz"),
+        Nf=get_metadata("Nf"),
     input:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_correlators.py",
@@ -16,6 +17,7 @@ rule extract_av:
         "python -m {params.module} {input.data} "
         "--output {output.data} --source point "
         "--Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz} "
+        "--Nf {params.Nf} "
         + " ".join(
             f"--sink {channel}"
             for channel in ["ConservedA4", "A4_1LINK", "PION_PS"]

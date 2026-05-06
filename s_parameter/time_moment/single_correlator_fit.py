@@ -100,7 +100,10 @@ def main():
     dump_numpy(
         {
             **result,
-            **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]},
+            **{
+                key: data[key]
+                for key in ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+            },
             "channel": args.channel,
             "min_timeslice": args.min_timeslice,
             "max_timeslice": args.max_timeslice,

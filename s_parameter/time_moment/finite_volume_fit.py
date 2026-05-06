@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 from ..io import read_numpy, dump_numpy
 
 
-METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 
 
 def get_args():

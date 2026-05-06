@@ -83,7 +83,7 @@ def main():
     dump_numpy(
         {
             **result,
-            **{key: full_data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz"]},
+            **{key: full_data[key] for key in ["mass", "Nf", "Nt", "Nx", "Ny", "Nz"]},
             "plateau_start": args.tmin,
             "plateau_end": args.tmax,
             "bin_size": args.bin_size,

@@ -120,7 +120,7 @@ def main():
     with open(args.input_file_Z_A, "r") as input_file_Z_A:
         Z_A = json.load(input_file_Z_A, object_pairs_hook=convert_types)
 
-    common_metadata_keys = ["mass", "Nt", "Nx", "Ny", "Nz"]
+    common_metadata_keys = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz"]
     check_consistent_metadata(v_a, Z_A, common_metadata_keys)
 
     result = process(v_a, Z_A)

@@ -6,7 +6,7 @@ from ..io import read_numpy, dump_numpy
 from ..stats import generate_jackknife, jackknife_mean_variance
 
 
-METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 
 
 def get_args():
@@ -20,6 +20,7 @@ def get_args():
 def get_infinite_volume_S(data, result):
     assert len(data) > 0
     (mass,) = set(datum["mass"] for datum in data)
+    (Nf,) = set(datum["Nf"] for datum in data)
 
     if len(data) > 1:
         # We already fitted these data; don't need to re-compute
@@ -28,6 +29,7 @@ def get_infinite_volume_S(data, result):
             "S_infinite_volume": result["fit_result"]["S_infinite_volume"][mass_index],
             "method": "fit_result",
             "mass": mass,
+            "Nf": Nf,
             "source_metadata": result["source_metadata"],
         }
 
@@ -48,6 +50,7 @@ def get_infinite_volume_S(data, result):
         "S_infinite_volume_samples": infinite_volume_S_samples,
         "method": "extrapolation",
         "mass": mass,
+        "Nf": Nf,
         "source_metadata": [{key: datum[key] for key in METADATA_KEYS}],
     }
 

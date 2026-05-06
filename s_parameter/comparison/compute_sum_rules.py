@@ -10,7 +10,7 @@ from ..io import read_numpy, dump_numpy
 from ..stats import jackknife_mean_variance, generate_jackknife
 
 
-METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+METADATA_KEYS = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
 
 
 def get_args():

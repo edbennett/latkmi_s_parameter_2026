@@ -7,6 +7,7 @@ rule extract_v_a:
         Nx=get_metadata("Nx"),
         Ny=get_metadata("Ny"),
         Nz=get_metadata("Nz"),
+        Nf=get_metadata("Nf"),
     input:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_correlators.py",
@@ -23,6 +24,7 @@ rule extract_v_a:
             for direction in range(4)
         )
         + " --Nt {params.Nt} --Nx {params.Nx} --Ny {params.Ny} --Nz {params.Nz} "
+        + " --Nf {params.Nf} "
         + " ".join(
             f"--sink {current}Current{channel}{direction}"
             for current in ["OneLink", "Conserved"]

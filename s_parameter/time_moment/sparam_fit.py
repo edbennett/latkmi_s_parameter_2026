@@ -290,7 +290,10 @@ def main():
     dump_numpy(
         {
             **result,
-            **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]},
+            **{
+                key: data[key]
+                for key in ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
+            },
             "m_rho": m_rho_data,
             "m_a_1": m_a_1_data,
             "min_timeslice": args.min_timeslice,

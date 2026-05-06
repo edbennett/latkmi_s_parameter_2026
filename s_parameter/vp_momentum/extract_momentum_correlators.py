@@ -21,6 +21,7 @@ def get_args():
     parser.add_argument("--Nx", type=int, default=None)
     parser.add_argument("--Ny", type=int, default=None)
     parser.add_argument("--Nz", type=int, default=None)
+    parser.add_argument("--Nf", type=int, default=None)
     return parser.parse_args()
 
 
@@ -195,7 +196,9 @@ def main():
         data = read_data(file_object, args.use_complex)
 
     # TODO: Check consistency between correlator length and given Nt
-    data.update({"Nt": args.Nt, "Nx": args.Nx, "Ny": args.Ny, "Nz": args.Nz})
+    data.update(
+        {"Nt": args.Nt, "Nx": args.Nx, "Ny": args.Ny, "Nz": args.Nz, "Nf": args.Nf}
+    )
 
     if args.output_file is None:
         json.dump(data, sys.stdout)

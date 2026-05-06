@@ -11,7 +11,7 @@ from ..io import read_numpy, dump_numpy
 from ..stats import generate_jackknife, jackknife_mean_variance
 
 
-METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "bin_size"]
+METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 
 taste_multiplicities = {
     None: 1,
