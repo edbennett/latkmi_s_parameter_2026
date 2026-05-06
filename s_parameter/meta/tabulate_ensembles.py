@@ -18,6 +18,9 @@ def get_row(metadatum):
     metadatum["configuration_count"] = (
         metadatum["trajectory_count"] // metadatum["configuration_separation"]
     )
+    metadatum["bin_width_trajectories"] = (
+        metadatum["bin_width"] * metadatum["configuration_separation"]
+    )
 
     columns = [
         ("Nx", False),
@@ -26,7 +29,7 @@ def get_row(metadatum):
         ("trajectory_count", True),
         ("configuration_separation", True),
         ("configuration_count", True),
-        ("bin_width", True),
+        ("bin_width_trajectories", True),
         ("source_count", False),
     ]
     elements = [
@@ -65,7 +68,7 @@ def tabulate(metadata):
     content = [
         get_row(metadatum)
         for metadatum in metadata.sort_values(
-            by=["Nt", "mf"], ascending=[False, True]
+            by=["mf", "Nt"], ascending=[True, False]
         ).to_dict(orient="records")
     ]
     return "\n".join([header, *content, footer])
