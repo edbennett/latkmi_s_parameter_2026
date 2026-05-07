@@ -170,9 +170,10 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
 
     assert data.shape[:-1] == m_rho.shape
     assert data.shape[:-1] == m_a_1.shape
-    _, data_uncertainty = jackknife_mean_variance(data)
+    data_values, data_uncertainty = jackknife_mean_variance(data)
 
     fit_samples = []
+    times = np.arange(min_timeslice, max_timeslice)
     for sample, m_rho_sample, m_a_1_sample in zip(data, m_rho, m_a_1):
         result, _ = curve_fit(
             partial(
@@ -181,7 +182,7 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
                 m_rho=m_rho_sample,
                 max_time=2 * (data.shape[-1] - 1),
             ),
-            np.arange(min_timeslice, max_timeslice),
+            times,
             sample[min_timeslice:max_timeslice],
             sigma=data_uncertainty[min_timeslice:max_timeslice],
         )
@@ -200,12 +201,25 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         min_timeslice,
         start_S_samples,
     )
+
+    residual = fit_form(
+        times, *values, m_rho.mean(), m_a_1.mean(), 2 * (data.shape[-1] - 1)
+    )
+    chisquare = (
+        (
+            (residual - data_values[min_timeslice:max_timeslice])
+            / data_uncertainty[min_timeslice:max_timeslice]
+        )
+        ** 2
+    ).sum()
     return {
         "fit_result_samples": np.array(fit_samples),
         "C_V_plus": C_V_plus,
         "C_A_plus": C_A_plus,
         "C_V_minus": C_V_minus,
         "C_A_minus": C_A_minus,
+        "chisquare": chisquare,
+        "dof": max_timeslice - min_timeslice + 1 - len(values),
         **extrapolated_S,
     }
 
