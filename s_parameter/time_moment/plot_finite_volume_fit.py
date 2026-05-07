@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from ..io import read_numpy
 from ..plot import iterate_attribute, save_or_show, Props
-from ..stats import jackknife_mean_variance
+from ..stats import jackknife_mean_variance, add_quadrature
 
 
 def get_args():
@@ -49,8 +49,8 @@ def add_data(ax, data, fit_result, props):
             infinite_volume_S_value - datum["S_infinite_t"][0] for datum in subset
         ]
         difference_error = [
-            (infinite_volume_S_error**2 + datum["S_infinite_t"][1] ** 2)
-            ** 0.5  # TODO systematic
+            add_quadrature(infinite_volume_S_error, datum["S_infinite_t"][1])
+            # TODO systematic
             for datum in subset
         ]
         ax.errorbar(

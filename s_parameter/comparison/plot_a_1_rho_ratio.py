@@ -4,17 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from ..plot import comparison_plot_main, iterate_lengths, plot_new_series, add_qcd_value
+from ..stats import product_error_contribution
 
 
 def get_unique_masses(data):
     return sorted(set(datum["mass"] for datum in data))
-
-
-def product_error_contribution(data, *keys):
-    return (
-        sum([(data[f"error_{key}"] / data[f"value_{key}"]) ** 2 for key in keys]).sum()
-        ** 0.5
-    )
 
 
 def add_old_data(ax, target_ensembles, source_data, marker):

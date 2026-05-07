@@ -7,6 +7,7 @@ import numpy as np
 
 from ..io import read_numpy, read_numpy_optional
 from ..plot import Props, save_or_show
+from ..stats import add_quadrature
 from .pade import get_momentum_filter
 from .plot_vpf import plot_fit_result
 
@@ -33,9 +34,8 @@ def plot_single_datum(ax, datum, props, Z_A):
     vpf = datum["vpf"]["Conserved"]
     Z_A_value, Z_A_error = Z_A["central"]["Z_A_0"] if Z_A else (1, 0)
     vpf_value = vpf[0] * Z_A_value
-    vpf_error = (
-        np.abs(vpf_value)
-        * ((vpf[1] / vpf[0]) ** 2 + (Z_A_error / Z_A_value) ** 2) ** 0.5
+    vpf_error = np.abs(vpf_value) * add_quadrature(
+        (vpf[1], vpf[0]), (Z_A_error, Z_A_value)
     )
     ax.errorbar(
         datum["momentum_squared"][momentum_filter],

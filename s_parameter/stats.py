@@ -140,3 +140,14 @@ def generate_jackknife(mass, mass_error, data, shape):
         shape = [shape]
     distribution_std = mass_error / (np.prod(shape) - 1) ** 0.5
     return rng.normal(mass, distribution_std, shape)
+
+
+def add_quadrature(*values):
+    total = 0
+    for value in values:
+        if isinstance(value, tuple):
+            numerator, denominator = value
+            total += (numerator / denominator) ** 2
+        else:
+            total += value**2
+    return total**0.5

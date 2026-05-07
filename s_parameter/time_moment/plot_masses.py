@@ -7,6 +7,7 @@ import numpy as np
 
 from ..io import read_numpy
 from ..plot import save_or_show
+from ..stats import add_quadrature
 
 
 def get_args():
@@ -39,7 +40,7 @@ def plot(data):
                     ]
                 ),
             )
-            combined_errors = (errors**2 + systematics**2) ** 0.5
+            combined_errors = add_quadrature(errors, systematics)
             valid_data = abs(errors / values) < 0.2
             ax.errorbar(
                 masses[valid_data],

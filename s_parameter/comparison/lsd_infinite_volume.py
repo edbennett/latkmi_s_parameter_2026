@@ -5,7 +5,7 @@ from argparse import ArgumentParser, FileType
 import pandas as pd
 
 from ..io import read_numpy
-from ..stats import generate_jackknife, jackknife_mean_variance
+from ..stats import generate_jackknife, jackknife_mean_variance, add_quadrature
 from ..time_moment.finite_volume import delta_fv_S
 
 
@@ -66,13 +66,9 @@ def add_pi_over_chiral_rho_mass(input_data, chiral_data):
     data = input_data.copy()
 
     value_ratio = data["value_pi_mass"] / value_chiral_rho_mass
-    error_ratio = (
-        value_ratio
-        * (
-            (data["error_pi_mass"] / data["value_pi_mass"]) ** 2
-            + (error_chiral_rho_mass / value_chiral_rho_mass) ** 2
-        )
-        ** 0.5
+    error_ratio = value_ratio * add_quadrature(
+        (data["error_pi_mass"], data["value_pi_mass"]),
+        (error_chiral_rho_mass, value_chiral_rho_mass),
     )
     data["value_pi_mass_over_chiral_rho_mass"] = value_ratio
     data["error_pi_mass_over_chiral_rho_mass"] = error_ratio

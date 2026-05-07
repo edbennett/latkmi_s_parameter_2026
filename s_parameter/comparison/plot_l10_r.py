@@ -8,6 +8,7 @@ import pandas as pd
 
 from ..io import read_numpy
 from ..plot import save_or_show
+from ..stats import add_quadrature
 
 
 def get_args():
@@ -38,8 +39,8 @@ def add_band(ax, data, colour, label):
         systematic_upper = 0
         systematic_lower = 0
 
-    total_upper_uncertainty = (systematic_upper**2 + statistical_uncertainty**2) ** 0.5
-    total_lower_uncertainty = (systematic_lower**2 + statistical_uncertainty**2) ** 0.5
+    total_upper_uncertainty = add_quadrature(systematic_upper, statistical_uncertainty)
+    total_lower_uncertainty = add_quadrature(systematic_lower, statistical_uncertainty)
 
     ax.axhline(value, color=colour)
     ax.axhspan(
