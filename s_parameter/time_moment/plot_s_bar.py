@@ -42,7 +42,7 @@ def plot_single_data(ax, data, label, colour):
         yerr=s_eff_error,
         linestyle="none",
         label=label,
-        marker="o",
+        marker="s",
         color=colour,
     )
 
