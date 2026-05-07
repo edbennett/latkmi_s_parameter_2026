@@ -31,13 +31,13 @@ vp_momentum_plots = [
     "S_parameter_chisquare_mf_fit_range_large",
     "vpf_Nf8_mf0.015_42x42x42x56",
     "renormalised_vpf_Nf8_mf0.015_42x42x42x56",
-    "S_extrapolation_Nf8_mf0.015_42x42x42x56",
 ]
 time_moment_plots = [
     "zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
     "finite_volume_fit",
     "S_timemoment_contributions",
     "fitted_zero_momentum_correlator_Nf8_mf0.009_48x48x48x64",
+    "S_extrapolation_Nf8_mf0.009_48x48x48x64",
 ]
 comparison_plots = [
     "S_tm_vp_comparison",
@@ -52,6 +52,7 @@ comparison_plots = [
     "S_parameter_mpi_L_group_by_mass",
     "S_parameter_mpi_L_group_by_length",
     "S_parameter_infinite_volume_comparison",
+    "S_parameter_infinite_volume_comparison_lsd",
     "l10_r",
 ]
 meta_plots = ["pv_spectrum"]
