@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..define import define, get_filename
 from ..io import read_numpy, read_numpy_optional
 from ..plot import Props, save_or_show
 from ..stats import add_quadrature
@@ -22,6 +23,7 @@ def get_args():
     parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
     parser.add_argument("--output_file", default=None)
     parser.add_argument("--q_squared_upper_bound", type=float, default=None)
+    parser.add_argument("--output_definitions", type=FileType("w"), default=None)
     return parser.parse_args()
 
 
@@ -72,6 +74,12 @@ def plot(data=[], fit_results=[], Z_A=None, q_squared_upper_bound=None):
     return fig
 
 
+def get_definitions(data, output_file):
+    filename = get_filename(output_file)
+    masses = [datum["mass"] for datum in data]
+    return define(f"{filename}_Mass_Range", f"{min(masses)} - {max(masses)}")
+
+
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
@@ -86,6 +94,10 @@ def main():
         args.q_squared_upper_bound,
     )
     save_or_show(fig, args.output_file)
+    if args.output_definitions:
+        print(
+            get_definitions(data, args.output_definitions), file=args.output_definitions
+        )
 
 
 if __name__ == "__main__":

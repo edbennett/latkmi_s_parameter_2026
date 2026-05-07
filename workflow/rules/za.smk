@@ -72,11 +72,13 @@ rule Z_A_eff_plot:
         plot_styles=config["plot_styles"],
     output:
         plot="assets/plots/Z_A_eff.pdf",
+        definitions="assets/definitions/Z_A_eff_ensembles.tex",
     conda:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot} "
+        "--output_definitions {output.definitions} "
         "--Z_A_lower_bound 1.025"
 
 
@@ -126,3 +128,18 @@ rule Z_A_fit_plot:
         "python -m {params.module} {input.data} {params.extra_args} "
         "--fit_result {input.fit_result} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule Z_A_definitions:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.Z_A_fit.output.data,
+        script="s_parameter/definitions/Z_A.py",
+    output:
+        definitions="assets/definitions/Z_A.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--output_definitions {output.definitions}"

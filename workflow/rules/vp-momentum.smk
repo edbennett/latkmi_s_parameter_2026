@@ -197,12 +197,14 @@ rule plot_VPF_multiple:
         plot_styles=config["plot_styles"],
     output:
         plot="assets/plots/vpf_{mass_range}_ensembles.pdf",
+        definitions="assets/definitions/vpf_{mass_range}_ensembles.tex",
     conda:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} {params.fit_result_flags} "
         "--plot_styles {input.plot_styles} --output_file {output.plot} "
-        "--q_squared_upper_bound {params.q_squared_upper_bound}"
+        "--q_squared_upper_bound {params.q_squared_upper_bound} "
+        "--output_definitions {output.definitions}"
 
 
 rule plot_S_parameter:
@@ -270,3 +272,33 @@ rule plot_fit_range_comparison_small_volume:
     shell:
         "python -m {params.module} {input.data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule vp_chisquare_definitions:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        fit_results=get_ensemble_data(f"light_vpf_fit", "renormalised_pade_fit_final.json"),
+        script="s_parameter/definitions/pade_chisquare.py",
+    output:
+        definitions="assets/definitions/pade_chisquare.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.fit_results} "
+        "--output_definitions {output.definitions}"
+
+
+rule lightest_S_definition:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        fit_result=f"processed_data/{subdir_format}/renormalised_pade_fit_final.json",
+        script="s_parameter/definitions/pade_single.py",
+    output:
+        definitions=f"processed_data/{subdir_format}/pade_result.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.fit_result} "
+        "--output_definitions {output.definitions}"

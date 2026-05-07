@@ -189,6 +189,31 @@ rule S_parameter_tm_fit:
         "--output_file {output.data}"
 
 
+rule S_parameter_tm_definitions:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        fit_result=rules.S_parameter_tm_fit.output.data,
+        script="s_parameter/definitions/tm_fit_result.py",
+    output:
+        definitions=f"processed_data/{subdir_format}/s_parameter_tm_fit_result.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.fit_result} "
+        "--prefix Nf{wildcards.Nf}_mf{wildcards.mf}_T{wildcards.Nt}L{wildcards.Nx} "
+        "--output_definitions {output.definitions}"
+
+
+rule copy_lightest_tm_fit_range:
+    input:
+        "processed_data/nf8/mf0.009/48x48x48x64/s_parameter_tm_fit_result.tex",
+    output:
+        "assets/definitions/lightest_tm_fit_result.tex",
+    shell:
+        "cp {input} {output}"
+
+
 rule finite_volume_factor:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
@@ -260,7 +285,6 @@ rule infinite_volume_extrapolate:
     shell:
         "python -m {params.module} {input.data} --fit_result {input.fit} "
         "--output_file {output.data}"
-
 
 
 rule plot_zero_momentum_correlator:
@@ -350,3 +374,33 @@ rule plot_S_infinite_volume_fit:
         "python -m {params.module} {input.data} "
         "--fit_result {input.fit_result} --fit_form {input.fit_form} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule define_ensemble_groups:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        metadata=config["metadata_file"],
+        script="s_parameter/definitions/ensemble_groups.py",
+    output:
+        definitions="assets/definitions/ensemble_groups.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.metadata} "
+        "--output_definitions {output.definitions}"
+
+
+rule define_infinite_volume_fit_outputs:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.finite_volume_fit.output.data,
+        script="s_parameter/definitions/infinite_volume_time_moment.py",
+    output:
+        definitions="assets/definitions/infinite_volume_time_moment.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--output_definitions {output.definitions}"

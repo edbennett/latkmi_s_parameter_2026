@@ -64,6 +64,21 @@ tables = [
     "ensembles",
     "quoted_spectrum",
 ]
+definitions = [
+    "Z_A_eff_ensembles",
+    "Z_A",
+    "pade_chisquare",
+    "lightest_pade_result",
+    "vpf_light_ensembles",
+    "vpf_heavy_ensembles",
+    "lightest_tm_fit_result",
+    "ensemble_groups",
+    "infinite_volume_time_moment",
+    "lattice_spacing_matching",
+    "lightest_l10_r",
+    "spectrum_observations",
+    "lightest_infinite_volume_S_tm",
+]
 
 rule all:
     input:
@@ -73,7 +88,19 @@ rule all:
             ),
         ),
         tables=expand("assets/tables/{table_name}.tex", table_name=tables),
+        definitions="assets/definitions/all_definitions.tex",
     default_target: True
+
+
+rule all_definitions:
+    params:
+        content="\\\n".join([f"\\\\input \\{{{filename}\\}}" for filename in definitions])
+    input:
+        expand("assets/definitions/{filename}.tex", filename=definitions),
+    output:
+        "assets/definitions/all_definitions.tex",
+    shell:
+        "echo {params.content} > {output}"
 
 
 rule copy_ensemble_plot:
@@ -81,5 +108,23 @@ rule copy_ensemble_plot:
         f"processed_data/{subdir_format}/{{filename}}.{{extension}}",
     output:
         "assets/plots/{filename}_Nf{Nf}_mf{mf}_{Nx}x{Ny}x{Nz}x{Nt}.{extension}",
+    shell:
+        "cp {input} {output}"
+
+
+rule copy_lightest_definition:
+    input:
+        "processed_data/nf8/mf0.009/48x48x48x64/{filename}.tex",
+    output:
+        "assets/definitions/lightest_{filename}.tex",
+    shell:
+        "cp {input} {output}"
+
+
+rule copy_lightest_definition_infinite_volume:
+    input:
+        "processed_data/nf8/mf0.009/{filename}.tex",
+    output:
+        "assets/definitions/lightest_{filename}.tex",
     shell:
         "cp {input} {output}"

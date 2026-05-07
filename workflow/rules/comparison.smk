@@ -356,7 +356,7 @@ rule plot_lsd_infinite_volume:
         plot_styles=config["plot_styles"],
         script="s_parameter/comparison/plot_infinite_volume_S_lsd.py",
     output:
-        plot="assets/plots/S_infinite_volume_lsd.pdf",
+        plot="assets/plots/S_parameter_infinite_volume_comparison_lsd.pdf",
     conda:
         "../envs/python.yml"
     shell:
@@ -365,3 +365,65 @@ rule plot_lsd_infinite_volume:
         "--spectrum_data {input.spectrum_data} --chiral_fit_result {input.chiral_data} "
         "--lsd_data {input.lsd_data} "
         "--plot_styles {input.plot_styles} --output_file {output.plot}"
+
+
+rule define_lattice_spacing_ratio:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        latkmi_data=rules.get_previous_fit_results.output.data,
+        lsd_data="external_data/lsd_prd14_spectra_chiral_limit_table_3_9.csv",
+        script="s_parameter/definitions/lattice_spacing_matching.py",
+    output:
+        definitions="assets/definitions/lattice_spacing_matching.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} --chiral_fit_result_latkmi {input.latkmi_data} "
+        "--chiral_spectrum_lsd {input.lsd_data} "
+        "--output_definitions {output.definitions}"
+
+
+rule define_l10_r:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.compute_sum_rules.output.data,
+        script="s_parameter/definitions/l10_r.py",
+    output:
+        definitions=f"processed_data/{subdir_format}/l10_r.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--output_definitions {output.definitions}"
+
+
+rule define_spectrum_observations:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=config["spectrum_file"],
+        script="s_parameter/definitions/spectrum_observations.py",
+    output:
+        definitions=f"assets/definitions/spectrum_observations.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--output_definitions {output.definitions}"
+
+
+rule define_tm_S_infinite_volume:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=rules.infinite_volume_extrapolate.output.data,
+        script="s_parameter/definitions/tm_infinite_volume.py",
+    output:
+        definitions="processed_data/nf{Nf}/mf{mf}/infinite_volume_S_tm.tex",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} "
+        "--output_definitions {output.definitions}"

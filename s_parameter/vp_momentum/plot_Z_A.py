@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..define import define
 from ..io import read_Z_A
 from ..plot import save_or_show
 
@@ -15,6 +16,7 @@ def get_args():
     parser.add_argument("--plot_styles", default="styles/prd.mplstyle")
     parser.add_argument("--output_file", default=None)
     parser.add_argument("--Z_A_lower_bound", type=float, default=None)
+    parser.add_argument("--output_definitions", type=FileType("w"), default=None)
     return parser.parse_args()
 
 
@@ -64,11 +66,22 @@ def read(filenames):
     return [read_Z_A(filename) for filename in filenames]
 
 
+def get_definitions(data):
+    components = [
+        f"({datum['Nx']}, {datum['mass']})"
+        for datum in sorted(data, key=lambda d: d["Nx"], reverse=True)
+    ]
+    content = ", ".join(components)
+    return define("Z_A_Ensembles", f"\\left\\{{{content}\\right\\}}")
+
+
 def main():
     args = get_args()
     plt.style.use(args.plot_styles)
     data = read(args.input_files)
     save_or_show(plot(data, args.Z_A_lower_bound), args.output_file)
+    if args.output_definitions:
+        print(get_definitions(data), file=args.output_definitions)
 
 
 if __name__ == "__main__":
