@@ -32,7 +32,7 @@ def plot_single_datum(ax, datum, props, Z_A):
         [datum[key] for key in ["Nx", "Ny", "Nz", "Nt"]],
     )
     vpf = datum["vpf"]["Conserved"]
-    Z_A_value, Z_A_error = Z_A["central"]["Z_A_0"] if Z_A else (1, 0)
+    Z_A_value, _, Z_A_error = Z_A["central"]["Z_A_0"] if Z_A else (1, 0, 0)
     vpf_value = vpf[0] * Z_A_value
     vpf_error = np.abs(vpf_value) * add_quadrature(
         (vpf[1], vpf[0]), (Z_A_error, Z_A_value)

@@ -63,8 +63,11 @@ def fit(data):
     Z_A_0_linear = results["linear"]["Z_A_0"][0]
     Z_A_0_quadratic = results["quadratic"]["Z_A_0"][0]
     central_result = (Z_A_0_linear + Z_A_0_quadratic) / 2
+    central_statistical = 0.5 * (
+        abs(results["linear"]["Z_A_0"][1]) + abs(results["quadratic"]["Z_A_0"][1])
+    )
     central_error = abs(Z_A_0_linear - Z_A_0_quadratic) / 2
-    results["central"] = {"Z_A_0": (central_result, central_error)}
+    results["central"] = {"Z_A_0": (central_result, central_statistical, central_error)}
     return results
 
 

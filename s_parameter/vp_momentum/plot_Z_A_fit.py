@@ -78,7 +78,7 @@ def plot_fit_data(ax, fit_results):
 
 
 def add_arrow(ax, fit_result):
-    result_ufloat = ufloat(*fit_result)
+    result_ufloat = ufloat(fit_result[0], fit_result[2])
     ax.annotate(
         f"$Z_A = {result_ufloat:.01uSL}$",
         (0, fit_result[0]),

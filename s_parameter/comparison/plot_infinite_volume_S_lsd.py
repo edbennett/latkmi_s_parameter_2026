@@ -23,12 +23,22 @@ def get_args():
 
 
 def get_rho_mass(chiral_data):
-    results = chiral_data.query("Nf == 8 & state == 'mrho' & fit_form == 'Quadratic'")
-    assert len(results) == 1
-    result = results.iloc[0]
+    linear_result = chiral_data.query(
+        "Nf == 8 & state == 'mrho' & fit_form == 'Linear'"
+    )
+    quadratic_result = chiral_data.query(
+        "Nf == 8 & state == 'mrho' & fit_form == 'Quadratic'"
+    )
+
+    assert len(linear_result) == 1
+    assert len(quadratic_result) == 1
+    result = quadratic_result.iloc[0]
     params = list(map(float, result["params"].split(";")))
     errors = list(map(float, result["errors"].split(";")))
-    return params[0], errors[0]
+
+    linear_params = list(map(float, linear_result.iloc[0]["params"].split(";")))
+    systematic = abs(linear_params[0] - params[0])
+    return params[0], errors[0], systematic
 
 
 def get_pi_mass(spectrum_data, datum):
@@ -39,7 +49,7 @@ def get_pi_mass(spectrum_data, datum):
 
 
 def get_mpi_over_mrho(chiral_data, spectrum_data, datum):
-    value_rho_mass_chiral, error_rho_mass_chiral = get_rho_mass(chiral_data)
+    value_rho_mass_chiral, error_rho_mass_chiral, _ = get_rho_mass(chiral_data)
     value_pi_mass, error_pi_mass = get_pi_mass(spectrum_data, datum)
     value_ratio = value_pi_mass / value_rho_mass_chiral
     error_ratio = (
