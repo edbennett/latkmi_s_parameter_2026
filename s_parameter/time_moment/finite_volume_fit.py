@@ -50,18 +50,21 @@ def fit(data):
     mass_ordering, fit_form = get_fit_form(data)
     starting_guess = [1.0] + [1.0 for _ in mass_ordering]
 
-    fit_mean, fit_covariance = curve_fit(
+    fit_mean, fit_covariance, fit_info, _, _ = curve_fit(
         fit_form,
         [datum["delta_fv_S"][0] for datum in data],
         [datum["S_infinite_t"][0] for datum in data],
         sigma=[datum["S_infinite_t"][0] for datum in data],
         p0=starting_guess,
+        full_output=True,
     )
     const_coefficient, *S_infinite_volume = zip(fit_mean, fit_covariance.diagonal())
     return {
         "masses": mass_ordering,
         "C": const_coefficient,
         "S_infinite_volume": S_infinite_volume,
+        "chisquare": (fit_info["fvec"] ** 2).sum(),
+        "dof": len(data) - len(starting_guess),
     }
 
 
