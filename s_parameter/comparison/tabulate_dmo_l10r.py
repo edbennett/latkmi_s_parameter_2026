@@ -77,7 +77,7 @@ def tabulate(data):
                 [
                     "$L$",
                     "$T$",
-                    "$m_f$",
+                    "$am_f$",
                     r"$S_{\textrm{TM},\infty}$",
                     r"$L_{10}^r(M_\rho)\cdot{10}^3$",
                     r"$S_{\mathrm{DMO}}$",

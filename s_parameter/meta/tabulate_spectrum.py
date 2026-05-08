@@ -58,7 +58,7 @@ def tabulate(metadata, spectrum):
                 [
                     "$L$",
                     "$T$",
-                    "$m_f$",
+                    "$am_f$",
                     r"$aF_\pi$",
                     r"$aM_\pi$",
                     r"$aM_{\rho(\mathrm{PV})}$",

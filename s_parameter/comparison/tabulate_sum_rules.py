@@ -55,7 +55,7 @@ def tabulate(data):
                 [
                     "$L$",
                     "$T$",
-                    "$m_f$",
+                    "$am_f$",
                     r"$g_{\rho\pi\pi}^{\textnormal{\scriptsize{KSRF-I}}}$",
                     r"$g_{\rho\pi\pi}^{\textnormal{\scriptsize{KSRF-II}}}$",
                     "WSR-I",

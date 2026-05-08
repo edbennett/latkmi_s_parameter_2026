@@ -51,7 +51,7 @@ def tabulate(metadata):
                 [
                     "$L$",
                     "$T$",
-                    "$m_f$",
+                    "$am_f$",
                     r"$N_{\mathrm{traj}}$",
                     r"$N_{\mathrm{traj}}^{\mathrm{int}}$",
                     r"$N_{\mathrm{conf}}$",
