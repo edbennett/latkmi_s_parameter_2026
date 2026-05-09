@@ -146,11 +146,9 @@ def add_qcd_value(ax, numerator, denominator=None):
         "rho_mass": 770.26,
         # https://pdglive.lbl.gov/DataBlock.action?node=M010M
         "a_1_mass": 1230,
-        # https://arxiv.org/pdf/1507.02541
-        "rho_decay_const": 221.1,
-        # WHERE CAN THIS NUMBER COME FROM???
-        "a_1_decay_const": 300,
-        # ??????
+        # TODO: Ask Miura-san where the original numbers leading to these came from
+        "rho_decay_const": 217.4,
+        "a_1_decay_const": 171.2,
         "pi_decay_const": 130.2,
     }
 
