@@ -28,7 +28,6 @@ def get_with_attribute(data, spatial_size, temporal_size, mass, attribute):
     if len(subset) == 0:
         raise ValueError("Datum not found")
     if len(subset) > 1:
-        breakpoint()
         raise ValueError("Multiple results found")
     return subset[0]
 

@@ -137,19 +137,16 @@ def half_infinite_sum(data):
     zero_threshold = max(1e-15, abs_data[0].mean() / 1e8)
 
     # Ensure that the tail is decaying or zero
-    try:
-        assert abs_data[:half_count].sum() > abs_data[half_count:].sum() * 4
-        assert abs_data[:-quarter_count].sum() > abs_data[-quarter_count:].sum() * 8
-        assert (
-            (
-                (abs_data[half_count:-1] - abs_data[half_count + 1 :] > 0)
-                | (abs_data[half_count + 1 :] < zero_threshold)
-            )
-            .mean(axis=1)
-            .all()
+    assert abs_data[:half_count].sum() > abs_data[half_count:].sum() * 4
+    assert abs_data[:-quarter_count].sum() > abs_data[-quarter_count:].sum() * 8
+    assert (
+        (
+            (abs_data[half_count:-1] - abs_data[half_count + 1 :] > 0)
+            | (abs_data[half_count + 1 :] < zero_threshold)
         )
-    except Exception:
-        breakpoint()
+        .mean(axis=1)
+        .all()
+    )
 
     return result
 

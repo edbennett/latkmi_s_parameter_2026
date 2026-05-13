@@ -98,7 +98,6 @@ def get_samples(data, ensemble_mass, key):
         if key in datum["fit_result_samples"] and datum["mass"] == ensemble_mass
     ]
     if len(result) != 1:
-        breakpoint()
         raise ValueError("Missing or duplicate data")
 
     return result[0]
