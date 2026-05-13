@@ -69,8 +69,12 @@ def sample_jackknife(data, free_axes=-1):
         axis for axis in range(num_axes) if axis not in normalised_free_axes
     )
     observation_axes = tuple(axis for axis in full_axes if axis != sample_axis)
-    observation_count = prod([data.shape[axis] for axis in full_axes])
-
+    observation_count = prod(
+        [
+            data.shape[axis] - 1 if axis == sample_axis else data.shape[axis]
+            for axis in full_axes
+        ]
+    )
     return (
         data.sum(axis=full_axes) - data.sum(axis=observation_axes)
     ) / observation_count
