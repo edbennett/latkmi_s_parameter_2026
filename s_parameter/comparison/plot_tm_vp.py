@@ -54,7 +54,7 @@ def plot_single_series(ax, data, secondary_data, key, props):
             masses,
             values,
             errors,
-            color="grey" if secondary_data else colour,
+            color="silver" if secondary_data else colour,
             marker=marker,
             label=None if secondary_data else label,
             linestyle="none",

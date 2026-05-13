@@ -48,7 +48,7 @@ def add_band(ax, data, colour, label):
         value + total_upper_uncertainty,
         color=colour,
         label=label,
-        alpha=0.4,
+        alpha=0.2,
     )
 
 

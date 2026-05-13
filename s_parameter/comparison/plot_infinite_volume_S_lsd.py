@@ -104,7 +104,7 @@ def add_lsd_data(ax, data):
         data["value_S_lattice"],
         xerr=error_mpi_over_mrho,
         yerr=data["error_S_lattice"],
-        color="gray",
+        color="silver",
         marker=",",
         linestyle="none",
         label="LSD $L=32$",

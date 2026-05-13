@@ -124,8 +124,8 @@ def iterate_lengths(data):
     return iterate_attribute(data, "length")
 
 
-def plot_new_series(ax, data, key, colour, marker, label):
-    masses = [datum["mass"] for datum in data]
+def plot_new_series(ax, data, key, colour, marker, label, offset=0):
+    masses = [datum["mass"] + offset for datum in data]
     values, errors = zip(*[datum[key] for datum in data])
     ax.errorbar(
         masses,

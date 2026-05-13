@@ -13,10 +13,11 @@ def plot(data):
 
     for subset, (colour, marker, label) in iterate_lengths(data):
         plot_new_series(ax, subset, "ksrf-i", colour, marker, label)
-        plot_new_series(ax, subset, "ksrf-ii", "gray", marker, label)
+        plot_new_series(ax, subset, "ksrf-ii", "silver", marker, None, offset=0.0005)
 
     ax.set_xlim(0, None)
     ax.set_ylim(4, 7)
+    ax.legend(loc="best")
 
     return fig
 

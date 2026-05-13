@@ -26,7 +26,7 @@ def plot(data):
     fig, ax = plt.subplots()
 
     ax.set_xlabel("$am_f$")
-    ax.set_ylabel(r"$\overline{S}_{IR}$")
+    ax.set_ylabel(r"$\overline{S}_{\mathrm{IR}}$")
 
     masses = [datum["mass"] for datum in data]
     sign_names = {"+": "plus", "-": "minus"}

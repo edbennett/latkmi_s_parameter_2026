@@ -33,7 +33,7 @@ def add_old_data(ax, target_ensembles, source_data, marker):
         ratio,
         yerr=ratio * product_error_contribution(data, "ma1", "mrho"),
         marker=marker,
-        color="gray",
+        color="silver",
         linestyle="none",
     )
 
