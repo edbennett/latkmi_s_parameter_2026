@@ -63,7 +63,13 @@ def tabulate(data):
             r"\begin{tabular}{lllll}",
             r"\toprule",
             " & ".join(
-                ["$L$", "$T$", "$am_f$", r"$S_{\textrm{VP-Mom}}$", r"$S_{\textrm{TM}}$"]
+                [
+                    "$L$",
+                    "$T$",
+                    "$am_f$",
+                    r"$S_{\textrm{\scriptsize{VP-Mom}}}$",
+                    r"$S_{\textrm{\scriptsize{TM}}}$",
+                ]
             )
             + r" \\",
             r"\midrule",
