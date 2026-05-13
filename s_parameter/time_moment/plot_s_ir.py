@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from ..io import read_numpy
 from ..plot import save_or_show
+from ..stats import add_quadrature
 
 
 def get_args():
@@ -37,20 +38,22 @@ def plot(data):
         ("V", "-", "v"),
     ]:
         values_errors = [datum[f"S_{channel}_{sign_names[parity]}"] for datum in data]
-        values, errors = zip(*values_errors)
+        values = [contributions[0] for contributions in values_errors]
+        combined_errors = [add_quadrature(*errors) for _, *errors in values_errors]
         label = (
             rf"${{\overline{{S}}_\mathrm{{IR}}^{{\mathrm{{{channel}}}}}}}^{{{parity}}}$"
         )
         ax.errorbar(
             masses,
             values,
-            yerr=errors,
+            yerr=combined_errors,
             label=label,
             linestyle="none",
             marker=marker,
         )
 
     ax.set_xlim(0, None)
+    ax.axhline(0, color="black")
     ax.legend(loc="best", ncol=4)
 
     symmetrise_y_axis(ax)
