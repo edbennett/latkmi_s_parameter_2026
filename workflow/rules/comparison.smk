@@ -49,6 +49,11 @@ rule tabulate_vp_tm:
 rule compute_sum_rules:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+        skip_dmo_flag=lambda wildcards: (
+            ""
+            if get_metadata("plot_light_ensembles")(wildcards)[0]
+            else "--skip_rule dmo"
+        ),
     input:
         data=[
             f"processed_data/{subdir_format}/{channel}_mass_decay.json"
@@ -63,7 +68,7 @@ rule compute_sum_rules:
         "../envs/python.yml"
     shell:
         "python -m {params.module} {input.data} {input.infinite_volume_data} "
-        "--previous_data {input.previous_data} "
+        "--previous_data {input.previous_data} {params.skip_dmo_flag} "
         "--output_file {output.data}"
 
 
@@ -280,8 +285,14 @@ rule tabulate_l10_r:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        sum_rule_data=rules.simple_comparison_plot.input.data,
-        time_moment_data=rules.S_parameter_infinite_volume_comparison.input.time_moment_infinite_volume,
+        sum_rule_data=[
+            rules.compute_sum_rules.output.data.format(**datum)
+            for datum in metadata.to_dict(orient="records")
+        ],
+        time_moment_data=[
+            rules.infinite_volume_extrapolate.output.data.format(**datum)
+            for datum in metadata[["Nf", "mf"]].drop_duplicates().to_dict(orient="records")
+        ],
         script="s_parameter/comparison/tabulate_dmo_l10r.py",
     output:
         table="assets/tables/dmo_l10_r.tex",

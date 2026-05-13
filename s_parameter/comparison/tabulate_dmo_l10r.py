@@ -24,23 +24,23 @@ def get_row(data, spatial_size, temporal_size, mass):
         spatial_size,
         temporal_size,
         mass,
-        "dmo",
+        "l10-r",
     )
 
-    def formatter(value_with_errors):
+    def formatter(value_with_errors, scale_factor=1):
         if value_with_errors is None:
             return "---"
         return format_multiple_errors(
-            *value_with_errors,
+            *(value_with_errors * scale_factor),
             abbreviate=True,
             length_control="central",
             significant_figures=3,
         )
 
     time_moment_S = formatter(time_moment_datum["S_infinite_volume"])
-    time_moment_l10_r = formatter(sum_rule_datum.get("l10-r") * 1000)
+    time_moment_l10_r = formatter(sum_rule_datum.get("l10-r"), 1000)
     dmo_S = formatter(sum_rule_datum.get("dmo"))
-    dmo_l10_r = formatter(sum_rule_datum.get("dmo-l10-r") * 1000)
+    dmo_l10_r = formatter(sum_rule_datum.get("dmo-l10-r"), 1000)
 
     row_data = [
         spatial_size,

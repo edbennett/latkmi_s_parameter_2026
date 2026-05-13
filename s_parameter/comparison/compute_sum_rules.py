@@ -17,6 +17,7 @@ def get_args():
     parser = ArgumentParser()
     parser.add_argument("input_files", metavar="input_file", nargs="+")
     parser.add_argument("--previous_data", required=True)
+    parser.add_argument("--skip_rule", dest="skip_rules", action="append", default=[])
     parser.add_argument("--output_file", default="-", type=FileType("w"))
     return parser.parse_args()
 
@@ -223,9 +224,11 @@ rules = {
 }
 
 
-def compute_sum_rules(data):
+def compute_sum_rules(data, prefixes_to_skip=[]):
     result = {}
     for name, func in rules.items():
+        if any(name.startswith(prefix) for prefix in prefixes_to_skip):
+            continue
         try:
             result[name] = jackknife_mean_variance(
                 func({**data, **data["fit_result_samples"]})
@@ -246,7 +249,7 @@ def main():
     old_data = pd.read_csv(args.previous_data)
     add_generated_samples(new_data, old_data)
 
-    result = compute_sum_rules(new_data)
+    result = compute_sum_rules(new_data, args.skip_rules)
     dump_numpy(
         {
             **result,
