@@ -45,6 +45,27 @@ def jackknife_systematic_error(samples, result, method="max_deviation"):
     return np.abs(samples - result).max(axis=0)
 
 
+def jackknife_systematic_intermediary(samples, result, method="max_deviation"):
+    """
+    Given a set of samples of a quantity estimated with different systematics
+    (sampled along axis 0, with other axes free),
+    and the final central value estimate,
+    return the value from each sample set giving the contribution to the systematic.
+    """
+    if method != "max_deviation":
+        raise NotImplementedError(f"{method} not currently implemented")
+
+    # Need to explicitly convert `samples` since `take_along_axis` requires an ndarray
+    samples = np.array(samples)
+
+    differences = np.abs(samples - result)
+
+    # Return the positions in `samples` at which `abs(samples - result)` is maximum
+    return np.take_along_axis(
+        samples, differences.argmax(axis=0, keepdims=True), axis=0
+    ).squeeze(axis=0)
+
+
 def sample_jackknife(data, free_axes=-1):
     """
     Compute jackknife samples of data,
@@ -150,8 +171,13 @@ def add_quadrature(*values):
     total = 0
     for value in values:
         if isinstance(value, tuple):
-            numerator, denominator = value
-            total += (numerator / denominator) ** 2
+            if len(value) == 2:
+                numerator, denominator = value
+                total += (numerator / denominator) ** 2
+            elif len(value) == 1:
+                total += value[0] ** 2
+            else:
+                raise NotImplementedError("Unsupported error format")
         else:
             total += value**2
     return total**0.5

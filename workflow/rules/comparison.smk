@@ -10,7 +10,7 @@ rule plot_tm_vp:
             for row in metadata.to_dict(orient="records")
         ],
         vp_data=[
-            rules.pade_fit_renormalised.output.data.format(**row, upper_bound="final")
+            rules.pade_fit_systematics.output.data.format(**row, kind="renormalised")
             for row in metadata.to_dict(orient="records")
         ],
         plot_styles=config["plot_styles"],
@@ -33,7 +33,7 @@ rule tabulate_vp_tm:
             for row in metadata.to_dict(orient="records")
         ],
         vp_data=[
-            rules.pade_fit_renormalised.output.data.format(**row, upper_bound="final")
+            rules.pade_fit_systematics.output.data.format(**row, kind="renormalised")
             for row in metadata.to_dict(orient="records")
         ],
         script="s_parameter/comparison/tabulate_S_parameter.py",
@@ -260,8 +260,8 @@ rule S_parameter_infinite_volume_comparison:
             ).to_dict(orient="records")
         ],
         vp_momentum_finite_volume=[
-            rules.pade_fit_renormalised.output.data.format(
-                **ensemble, upper_bound="final"
+            rules.pade_fit_systematics.output.data.format(
+                **ensemble, kind="renormalised"
             )
             for ensemble in metadata.query(
                 "plot_large_volume_light_ensembles"

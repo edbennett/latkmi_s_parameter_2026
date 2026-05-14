@@ -11,6 +11,7 @@ from ..io import read_numpy, dump_numpy
 from ..stats import (
     jackknife_mean_variance,
     jackknife_systematic_error,
+    jackknife_systematic_intermediary,
     sample_systematics,
 )
 
@@ -78,19 +79,17 @@ def fit_single(samples, min_timeslice, max_timeslice, starting_guess=None):
     return results
 
 
-def fit_systematic(samples, result, min_timeslice, max_timeslice, starting_guess=None):
-    if starting_guess is not None:
-        # Remove decay constants
-        starting_guess = [starting_guess[i] for i in [0, 1, 3, 4]]
+def fit_systematic(samples, result, min_timeslice, max_timeslice):
+    starting_guess = [result[i] for i in [0, 1, 3, 4]]
 
     def fit_time_range(min_timeslice, max_timeslice):
-        return jackknife_mean_variance(
-            fit_single(
-                samples, min_timeslice, max_timeslice, starting_guess=starting_guess
-            )
-        )[0]
+        return fit_single(
+            samples, min_timeslice, max_timeslice, starting_guess=starting_guess
+        )
 
-    return sample_systematics(fit_time_range, min_timeslice, max_timeslice)
+    return jackknife_systematic_intermediary(
+        sample_systematics(fit_time_range, min_timeslice, max_timeslice), result
+    )
 
 
 def fit(full_data, min_timeslice, max_timeslice, channel):
@@ -99,12 +98,13 @@ def fit(full_data, min_timeslice, max_timeslice, channel):
 
     fit_samples = fit_single(data, min_timeslice, max_timeslice)
     values, errors = jackknife_mean_variance(fit_samples)
-    systematic_samples = fit_systematic(
-        data, values, min_timeslice, max_timeslice, starting_guess=values
-    )
+    systematic_samples = fit_systematic(data, values, min_timeslice, max_timeslice)
     systematic_errors = jackknife_systematic_error(systematic_samples, values)
 
-    states = {"V": {"main": "rho", "osc": "osc"}, "A": {"main": "a_1", "osc": "osc"}}
+    states = {
+        "V": {"main": "rho", "osc": "V_osc"},
+        "A": {"main": "a_1", "osc": "A_osc"},
+    }
     return {
         key: {
             f"{states[channel][name]}_{observable}": data

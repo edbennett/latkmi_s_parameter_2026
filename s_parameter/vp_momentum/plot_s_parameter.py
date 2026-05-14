@@ -44,12 +44,17 @@ def plot_single_series(
         for datum in data
         if datum["Nx"] == lattice_size and datum["upper_bound"] == upper_bound
     ]
+    if not volume_data:
+        return
+
     assert all(
         datum["Ny"] == lattice_size and datum["Nz"] == lattice_size
         for datum in volume_data
     )
     masses = [datum["mass"] + offset for datum in volume_data]
-    value, error = map(np.array, zip(*[datum_getter(datum) for datum in volume_data]))
+    value, error, _ = map(
+        np.array, zip(*[datum_getter(datum) for datum in volume_data])
+    )
     ax.errorbar(
         masses,
         value,

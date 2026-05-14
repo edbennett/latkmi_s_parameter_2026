@@ -71,6 +71,7 @@ def main():
                     "Nx",
                     "Ny",
                     "Nz",
+                    "Nf",
                     "bin_size",
                     "momentum_squared",
                     "reordered_momentum",

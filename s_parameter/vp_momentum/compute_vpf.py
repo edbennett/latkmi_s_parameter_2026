@@ -193,7 +193,7 @@ def main():
     dump_numpy(
         {
             **result,
-            **{key: full_data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz"]},
+            **{key: full_data[key] for key in ["mass", "Nf", "Nt", "Nx", "Ny", "Nz"]},
             "bin_size": args.bin_size,
         },
         args.output_file,

@@ -74,7 +74,7 @@ def plot(latkmi_data, spectrum_data, group_by, lsd_data=None):
         sorted_data, group_by, props
     ):
         mpi_L, mpi_L_error = zip(*[get_mpi_L(datum, spectrum_data) for datum in subset])
-        S_param, S_param_error = zip(
+        S_param, S_param_error, *_ = zip(
             *[datum["pade_fit_result"]["Conserved"]["S"] for datum in subset]
         )
         ax.errorbar(

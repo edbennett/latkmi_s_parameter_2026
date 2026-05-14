@@ -26,6 +26,9 @@ def get_args():
 def generate_mass_samples(match_datum, spectrum_data):
     result = {}
     keys = {"ma1": "a_1_mass", "mrho": "rho_mass"}
+    match_samples = match_datum["fit_result_samples"]
+    match_shape = match_samples[list(match_samples.keys())[0]].shape
+
     matching_spectra = (
         spectrum_data.query(
             "Nf == 8 & beta == 3.8 & mf == {mass}".format(**match_datum)
@@ -42,12 +45,7 @@ def generate_mass_samples(match_datum, spectrum_data):
     for old_key, new_key in keys.items():
         value = ensemble_spectrum[f"value_{old_key}"]
         error = ensemble_spectrum[f"error_{old_key}"]
-        result[new_key] = generate_jackknife(
-            value,
-            error,
-            match_datum,
-            match_datum["fit_result_samples"]["osc_mass"].shape,
-        )
+        result[new_key] = generate_jackknife(value, error, match_datum, match_shape)
 
     return result
 

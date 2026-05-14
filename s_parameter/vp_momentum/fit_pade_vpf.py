@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument("input_file")
     parser.add_argument("--output_file", type=FileType("w"), default="-")
     parser.add_argument("--renormalised", action="store_true")
-    parser.add_argument("--upper_bound", choices=["1", "max2", "max3", "final"])
+    parser.add_argument("--upper_bound", choices=["1", "max2", "max3"])
     return parser.parse_args()
 
 
@@ -103,7 +103,6 @@ def get_upper_bound(data, key):
         "1": 1,
         "max2": q_max2,
         "max3": q_max3,
-        "final": min(1, q_max2),
     }[key]
 
 
@@ -120,7 +119,7 @@ def main():
         {
             "pade_fit_result": result,
             "upper_bound": args.upper_bound,
-            **{key: data[key] for key in ["mass", "Nt", "Nx", "Ny", "Nz"]},
+            **{key: data[key] for key in ["mass", "Nf", "Nt", "Nx", "Ny", "Nz"]},
         },
         args.output_file,
     )

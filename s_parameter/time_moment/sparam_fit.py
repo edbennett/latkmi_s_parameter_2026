@@ -11,6 +11,7 @@ from ..io import read_numpy, dump_numpy
 from ..stats import (
     jackknife_mean_variance,
     jackknife_systematic_error,
+    jackknife_systematic_intermediary,
     sample_systematics,
 )
 
@@ -175,7 +176,7 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     fit_samples = []
     times = np.arange(min_timeslice, max_timeslice)
     for sample, m_rho_sample, m_a_1_sample in zip(data, m_rho, m_a_1):
-        result, _ = curve_fit(
+        result, *others = curve_fit(
             partial(
                 fit_form,
                 m_a_1=m_a_1_sample,
@@ -240,11 +241,25 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         fit_time_range, min_timeslice, max_timeslice
     )
 
-    for key in ["C_V_plus", "C_A_plus", "C_V_minus", "C_A_minus", "S_infinite_t"]:
+    for key in [
+        *[
+            f"{obs}_{channel}_{sign}"
+            for obs in ["S", "C"]
+            for channel in ["V", "A"]
+            for sign in ["plus", "minus"]
+        ],
+        "S_infinite_t",
+    ]:
         full_range_result[key] = add_systematic(
             full_range_result, systematic_samples, key
         )
 
+    full_range_result["S_infinite_t_systematic_samples"] = (
+        jackknife_systematic_intermediary(
+            [sample["S_infinite_t_samples"] for sample in systematic_samples],
+            full_range_result["S_infinite_t_samples"],
+        )
+    )
     fit_samples = full_range_result["fit_result_samples"]
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
         :, min_timeslice - 1

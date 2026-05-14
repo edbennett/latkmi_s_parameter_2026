@@ -3,10 +3,12 @@
 from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from ..io import read_numpy
 from ..plot import save_or_show
+from ..stats import add_quadrature
 
 
 def get_args():
@@ -24,21 +26,27 @@ def plot(latkmi_data, lsd_data):
     ax.set_xlabel(r"$M_\rho \sqrt{8t_0}$")
     ax.set_ylabel(r"$g_{\rho\pi\pi}^{\textnormal{\scriptsize{KSRF-II}}}$")
 
-    latkmi_mpi_s8t0_values, latkmi_mpi_s8t0_errors = zip(
-        *[datum["mrho_s8t0"] for datum in latkmi_data]
+    latkmi_mpi_s8t0_values, *latkmi_mpi_s8t0_errors = map(
+        np.array,
+        zip(*[datum["mrho_s8t0"] for datum in latkmi_data]),
     )
-    latkmi_ksrf_values, latkmi_ksrf_errors = zip(
-        *[datum["ksrf-ii"] for datum in latkmi_data]
+    latkmi_ksrf_values, *latkmi_ksrf_errors = map(
+        np.array,
+        zip(*[datum["ksrf-ii"] for datum in latkmi_data]),
     )
-    ax.errorbar(
-        latkmi_mpi_s8t0_values,
-        latkmi_ksrf_values,
-        xerr=latkmi_mpi_s8t0_errors,
-        yerr=latkmi_ksrf_errors,
-        linestyle="none",
-        marker="s",
-        label="LatKMI",
-    )
+    for xerrors, yerrors in [
+        (latkmi_mpi_s8t0_errors[0], latkmi_ksrf_errors[0]),
+        (add_quadrature(*latkmi_mpi_s8t0_errors), add_quadrature(*latkmi_ksrf_errors)),
+    ]:
+        ax.errorbar(
+            latkmi_mpi_s8t0_values,
+            latkmi_ksrf_values,
+            xerr=xerrors,
+            yerr=yerrors,
+            linestyle="none",
+            marker="s",
+            label="LatKMI",
+        )
 
     ax.errorbar(
         lsd_data.value_mrho_s8t0,

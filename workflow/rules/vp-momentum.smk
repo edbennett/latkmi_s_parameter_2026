@@ -134,13 +134,32 @@ rule pade_fit_bare:
         "--output_file {output.data}"
 
 
+rule pade_fit_systematics:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        data=lambda wildcards: (
+            f"processed_data/{subdir_format}/{{kind}}_pade_fit_{fit_range}.json"
+            for fit_range in (
+                ["max2", "max3"] if int(wildcards.Nx) > 18 else ["max2", "max3", "1"]
+            )
+        ),
+        script="s_parameter/vp_momentum/compute_s_parameter_systematics.py",
+    output:
+        data=f"processed_data/{subdir_format}/{{kind}}_pade_fit.json",
+    conda:
+        "../envs/python.yml"
+    shell:
+        "python -m {params.module} {input.data} --output_file {output.data}"
+
+
 rule plot_VPF:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=rules.VPF.output.data,
         script="s_parameter/vp_momentum/plot_vpf.py",
-        fit_result=f"processed_data/{subdir_format}/bare_pade_fit_final.json",
+        fit_result=f"processed_data/{subdir_format}/bare_pade_fit.json",
         plot_styles=config["plot_styles"],
     output:
         plot=f"processed_data/{subdir_format}/vpf.pdf",
@@ -158,7 +177,7 @@ rule plot_VPF_renormalised:
     input:
         data=rules.renormalise_VPF.output.data,
         script="s_parameter/vp_momentum/plot_vpf.py",
-        fit_result=f"processed_data/{subdir_format}/renormalised_pade_fit_final.json",
+        fit_result=f"processed_data/{subdir_format}/renormalised_pade_fit.json",
         plot_styles=config["plot_styles"],
     output:
         plot=f"processed_data/{subdir_format}/renormalised_vpf.pdf",
@@ -192,7 +211,7 @@ rule plot_VPF_multiple:
         q_squared_upper_bound=lambda wildcards: config["vpf_plot_upper_bounds"][wildcards.mass_range],
     input:
         data=lambda wildcards: get_ensemble_data(f"{wildcards.mass_range}_vpf_data", "vpf.json")(wildcards),
-        fit_results=lambda wildcards: get_ensemble_data(f"{wildcards.mass_range}_vpf_fit", "bare_pade_fit_final.json")(wildcards),
+        fit_results=lambda wildcards: get_ensemble_data(f"{wildcards.mass_range}_vpf_fit", "bare_pade_fit.json")(wildcards),
         script="s_parameter/vp_momentum/plot_vpf_multi.py",
         plot_styles=config["plot_styles"],
     output:
@@ -212,7 +231,7 @@ rule plot_S_parameter:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data={
-            f"processed_data/{subdir_format}/renormalised_pade_fit_final.json".format(
+            f"processed_data/{subdir_format}/renormalised_pade_fit.json".format(
                 **metadatum
             )
             for metadatum in metadata.to_dict(orient="records")
@@ -278,7 +297,7 @@ rule vp_chisquare_definitions:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        fit_results=get_ensemble_data(f"light_vpf_fit", "renormalised_pade_fit_final.json"),
+        fit_results=get_ensemble_data(f"light_vpf_fit", "renormalised_pade_fit.json"),
         script="s_parameter/definitions/pade_chisquare.py",
     output:
         definitions="assets/definitions/pade_chisquare.tex",
@@ -293,7 +312,7 @@ rule lightest_S_definition:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        fit_result=f"processed_data/{subdir_format}/renormalised_pade_fit_final.json",
+        fit_result=f"processed_data/{subdir_format}/renormalised_pade_fit.json",
         script="s_parameter/definitions/pade_single.py",
     output:
         definitions=f"processed_data/{subdir_format}/pade_result.tex",

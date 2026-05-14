@@ -7,7 +7,11 @@ import numpy as np
 import pandas as pd
 
 from ..io import read_numpy, dump_numpy
-from ..stats import jackknife_mean_variance, generate_jackknife
+from ..stats import (
+    jackknife_mean_variance,
+    generate_jackknife,
+    jackknife_systematic_error,
+)
 
 
 METADATA_KEYS = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
@@ -54,6 +58,11 @@ def combine_samples(data):
                 result["fit_result_samples"]["S_infinite_volume"] = datum[
                     "S_infinite_volume_samples"
                 ]
+            # TODO Adjust when systematics added to infinite volume extrapolation?
+            # If they are?
+            result["fit_result_systematic_samples"]["S_infinite_volume"] = datum[
+                "S_infinite_volume"
+            ][0]
             continue
 
         for key in datum["fit_result"]:
@@ -61,12 +70,16 @@ def combine_samples(data):
                 to_remove.append(key)
                 del result["fit_result"][key]
                 del result["fit_result_samples"][key]
+                del result["fit_result_systematic_samples"][key]
 
             if key in to_remove:
                 continue
 
             result["fit_result"][key] = datum["fit_result"][key]
             result["fit_result_samples"][key] = datum["fit_result_samples"][key]
+            result["fit_result_systematic_samples"][key] = datum[
+                "fit_result_systematic_samples"
+            ][key]
 
     if (
         "S_infinite_volume" in result["fit_result"]
@@ -117,6 +130,7 @@ def add_generated_samples(new_datum, old_data):
 
         new_datum["fit_result_samples"][new_key] = samples
         new_datum["fit_result"][new_key] = [value, error]
+        new_datum["fit_result_systematic_samples"][new_key] = value
 
 
 def wsr_i(samples):
@@ -230,9 +244,12 @@ def compute_sum_rules(data, prefixes_to_skip=[]):
         if any(name.startswith(prefix) for prefix in prefixes_to_skip):
             continue
         try:
-            result[name] = jackknife_mean_variance(
+            central, statistical = jackknife_mean_variance(
                 func({**data, **data["fit_result_samples"]})
             )
+            systematic_samples = func({**data, **data["fit_result_systematic_samples"]})
+            systematic = jackknife_systematic_error(systematic_samples, central)
+            result[name] = [central, statistical, systematic]
         except KeyError as key:
             message = f"Key {key} not found in data. Skipping computation of {name}."
             logging.warning(message)

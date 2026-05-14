@@ -11,6 +11,7 @@ import pandas as pd
 
 from .io import read_numpy
 from .comparison import compute_sum_rules
+from .stats import add_quadrature
 
 
 def save_or_show(fig, plot_target):
@@ -126,16 +127,25 @@ def iterate_lengths(data):
 
 def plot_new_series(ax, data, key, colour, marker, label, offset=0):
     masses = [datum["mass"] + offset for datum in data]
-    values, errors = zip(*[datum[key] for datum in data])
+    values, *errors = zip(*[datum[key] for datum in data])
     ax.errorbar(
         masses,
         values,
-        yerr=errors,
+        yerr=errors[0],
         linestyle="none",
         marker=marker,
         color=colour,
         label=label,
     )
+    if len(errors) > 1:
+        ax.errorbar(
+            masses,
+            values,
+            yerr=add_quadrature(*errors),
+            linestyle="none",
+            marker=marker,
+            color=colour,
+        )
 
 
 def add_qcd_value(ax, numerator, denominator=None):
