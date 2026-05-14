@@ -55,9 +55,9 @@ def fold(correlator):
     correlator_length = correlator.shape[-1]
     assert correlator_length % 2 == 0
     folded_length = correlator_length // 2
-    folded_correlator = correlator[:, :, : folded_length + 1]
-    folded_correlator[:, :, 1:folded_length] += correlator[:, :, -1:-folded_length:-1]
-    folded_correlator[:, :, 1:folded_length] /= 2
+    folded_correlator = correlator[:, : folded_length + 1]
+    folded_correlator[:, 1:folded_length] += correlator[:, -1:-folded_length:-1]
+    folded_correlator[:, 1:folded_length] /= 2
     return folded_correlator
 
 
@@ -86,16 +86,23 @@ def process(raw_v_a, Z_A):
     for current in ["OneLink", "Conserved"]:
         result = {}
         current_data = structure_data(raw_v_a["data"], current)
+
         for channel in ["V", "A"]:
-            zero_momentum_correlator = current_data[channel][:3, :, :, :].mean(axis=0)
-            binned_correlator = bin_data(zero_momentum_correlator, Z_A["bin_size"])
-            folded_correlator = fold(binned_correlator)
-            correlator_samples = sample_jackknife(folded_correlator)
-            renormalised_samples = renormalise(correlator_samples, Z_A, current)
-            result[f"{channel}_renormalised_samples"] = renormalised_samples
-            result[f"{channel}_renormalised"] = jackknife_mean_variance(
-                renormalised_samples
+            zero_momentum_correlator = current_data[channel][:3, :, :, :].mean(
+                axis=(0, 2)
             )
+            binned_correlator = bin_data(zero_momentum_correlator, Z_A["bin_size"])
+            correlator_samples = sample_jackknife(binned_correlator)
+            renormalised_samples = renormalise(correlator_samples, Z_A, current)
+            folded_renormalised_samples = fold(renormalised_samples)
+
+            for samples, label in [
+                # (renormalised_samples, "_renormalised"),
+                (folded_renormalised_samples, "_renormalised"),
+                (correlator_samples, ""),
+            ]:
+                result[f"{channel}{label}_samples"] = samples
+                result[f"{channel}{label}"] = jackknife_mean_variance(samples)
 
         v_minus_a_samples = (
             result["V_renormalised_samples"] - result["A_renormalised_samples"]

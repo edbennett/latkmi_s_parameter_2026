@@ -39,6 +39,10 @@ def fit_form(time, C_A_plus, C_A_minus, C_V_plus, C_V_minus, m_rho, m_a_1, max_t
     and should be preset using `partial` or similar for fitting.
     `max_time = None` corresponds to the infinite $T$ limit.
     """
+    # C_A_plus = np.clip(C_A_plus, 0, 1)
+    # C_A_minus = np.clip(C_A_minus, -1, 0)
+    # C_V_plus = np.clip(C_V_plus, -1, 0)
+    # C_V_minus = np.clip(C_V_minus, 0, 1)
     return (C_V_plus - (-1) ** time * C_A_plus) * (
         np.exp(-m_rho * time)
         + (0 if max_time is None else np.exp(-m_rho * (max_time - time)))
@@ -102,7 +106,7 @@ def extrapolate_S_infinite_t(fit_samples, m_rho, m_a_1, t_0, S_t_0):
         ]
     ).T
     # Eq. (28) uses 4pi * (-1/2!); this is simplified to -2pi here.
-    contributions = np.pi / 2 * (fit_samples * factors)
+    contributions = -np.pi / 2 * (fit_samples * factors)
     result = {
         f"S_{name}": (value, error)
         for name, value, error in zip(
@@ -137,7 +141,7 @@ def extrapolate_S_finite_t(fit_samples, m_rho, m_a_1, t_0, t_max, S_t_0):
         )
         * np.array([-1, -1, 1, 1])[:, np.newaxis]
     )
-    S_eff_samples = S_t_0[:, np.newaxis] + np.pi / 2 * (
+    S_eff_samples = S_t_0[:, np.newaxis] - np.pi / 2 * (
         fit_samples[..., np.newaxis] * factors
     ).sum(axis=1)
     return {
@@ -153,7 +157,7 @@ def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, max_time, 
     to obtain the interpolated effective S parameter as a function of T.
     """
     times = np.arange(t_0, t_1)[:, np.newaxis]
-    correlator = fit_form(times, *(np.array(fit_samples).T), m_rho, m_a_1, max_time).T
+    correlator = -fit_form(times, *(np.array(fit_samples).T), m_rho, m_a_1, max_time).T
 
     S_eff_samples = (
         S_t_0 - np.cumsum(compute_S_parameter_contribution(correlator, t_0), axis=1).T
@@ -166,8 +170,7 @@ def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, max_time, 
 
 
 def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
-    # Negate samples to have positive data to fit
-    data = -full_data["Conserved"]["V-A_renormalised_samples"]
+    data = full_data["Conserved"]["V-A_renormalised_samples"]
 
     assert data.shape[:-1] == m_rho.shape
     assert data.shape[:-1] == m_a_1.shape
@@ -186,6 +189,8 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
             times,
             sample[min_timeslice:max_timeslice],
             sigma=data_uncertainty[min_timeslice:max_timeslice],
+            bounds=([0, -1, -1, 0], [1, 0, 0, 1]),
+            full_output=True,
         )
         fit_samples.append(result)
 
