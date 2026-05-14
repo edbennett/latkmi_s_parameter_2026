@@ -39,7 +39,7 @@ def get_row(datum):
     mass = datum["mass"]
 
     row_data = [spatial_size, temporal_size, mass] + [
-        format_multiple_errors(*datum[key], abbreviate=True, significant_figures=2)
+        f"${format_multiple_errors(*datum[key], abbreviate=True, significant_figures=2)}$"
         for key in ["ksrf-i", "ksrf-ii", "wsr-i", "wsr-ii"]
     ]
     return " & ".join(map(str, row_data)) + r" \\"

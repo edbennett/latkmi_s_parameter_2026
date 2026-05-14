@@ -30,11 +30,13 @@ def get_row(data, spatial_size, temporal_size, mass):
     def formatter(value_with_errors, scale_factor=1):
         if value_with_errors is None:
             return "---"
-        return format_multiple_errors(
-            *(value_with_errors * scale_factor),
-            abbreviate=True,
-            length_control="central",
-            significant_figures=3,
+        return "${}$".format(
+            format_multiple_errors(
+                *(value_with_errors * scale_factor),
+                abbreviate=True,
+                length_control="central",
+                significant_figures=3,
+            )
         )
 
     time_moment_S = formatter(time_moment_datum["S_infinite_volume"])
@@ -78,7 +80,7 @@ def tabulate(data):
                     "$L$",
                     "$T$",
                     "$am_f$",
-                    r"$S_{\textrm{TM},\infty}$",
+                    r"$S_{\mathrm{TM},\infty}$",
                     r"$L_{10}^r(M_\rho)\cdot{10}^3$",
                     r"$S_{\mathrm{DMO}}$",
                     r"$L_{10}^r(M_\rho)|_{\mathrm{DMO}}\cdot{10}^3$",
