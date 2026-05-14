@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser, FileType
+from functools import partial
+from multiprocessing import Pool
 
 import pandas as pd
 
@@ -30,24 +32,28 @@ def get_args():
     return parser.parse_args()
 
 
+def extrapolate_single(datum, fit_result):
+    assert datum["Nx"] == datum["Ny"]
+    assert datum["Nx"] == datum["Nz"]
+    # Add metadata for compatibility with generate_jackknife_samples
+    datum["mass"] = datum["m_f"]
+    datum["bin_size"] = 1
+    pi_mass = _generate_jackknife(datum, "pi_mass")
+    finite_volume_factor = delta_fv_S(datum["Nx"], pi_mass)
+    finite_volume_S = _generate_jackknife(datum, "S_lattice")
+    const_coefficient = generate_jackknife(
+        *fit_result["fit_result"]["C"], datum, JACKKNIFE_SAMPLE_SIZE
+    )
+    return jackknife_mean_variance(
+        finite_volume_S - const_coefficient * finite_volume_factor
+    )
+
+
 def extrapolate(s_parameter_data, fit_result):
-    results = []
-    for datum in s_parameter_data.to_dict(orient="records"):
-        assert datum["Nx"] == datum["Ny"]
-        assert datum["Nx"] == datum["Nz"]
-        # Add metadata for compatibility with generate_jackknife_samples
-        datum["mass"] = datum["m_f"]
-        datum["bin_size"] = 1
-        pi_mass = _generate_jackknife(datum, "pi_mass")
-        finite_volume_factor = delta_fv_S(datum["Nx"], pi_mass)
-        finite_volume_S = _generate_jackknife(datum, "S_lattice")
-        const_coefficient = generate_jackknife(
-            *fit_result["fit_result"]["C"], datum, JACKKNIFE_SAMPLE_SIZE
-        )
-        results.append(
-            jackknife_mean_variance(
-                finite_volume_S - const_coefficient * finite_volume_factor
-            )
+    with Pool() as pool:
+        results = pool.map(
+            partial(extrapolate_single, fit_result=fit_result),
+            s_parameter_data.to_dict(orient="records"),
         )
     result_df = s_parameter_data.copy()
     result_df["value_S_infinite_volume"], result_df["error_S_infinite_volume"] = zip(

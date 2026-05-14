@@ -332,6 +332,7 @@ rule compute_lsd_infinite_volume:
         script="s_parameter/comparison/lsd_infinite_volume.py",
     # This is a slow process due to computing all finite volume factors at once
     priority: 50
+    threads: 5
     output:
         data="processed_data/lsd_infinite_volume.csv",
     conda:
