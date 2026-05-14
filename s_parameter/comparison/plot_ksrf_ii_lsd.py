@@ -34,9 +34,13 @@ def plot(latkmi_data, lsd_data):
         np.array,
         zip(*[datum["ksrf-ii"] for datum in latkmi_data]),
     )
-    for xerrors, yerrors in [
-        (latkmi_mpi_s8t0_errors[0], latkmi_ksrf_errors[0]),
-        (add_quadrature(*latkmi_mpi_s8t0_errors), add_quadrature(*latkmi_ksrf_errors)),
+    for xerrors, yerrors, label in [
+        (latkmi_mpi_s8t0_errors[0], latkmi_ksrf_errors[0], "LatKMI"),
+        (
+            add_quadrature(*latkmi_mpi_s8t0_errors),
+            add_quadrature(*latkmi_ksrf_errors),
+            None,
+        ),
     ]:
         ax.errorbar(
             latkmi_mpi_s8t0_values,
@@ -45,7 +49,7 @@ def plot(latkmi_data, lsd_data):
             yerr=yerrors,
             linestyle="none",
             marker="s",
-            label="LatKMI",
+            label=label,
         )
 
     ax.errorbar(
