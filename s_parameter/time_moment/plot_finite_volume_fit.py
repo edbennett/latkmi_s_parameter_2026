@@ -26,8 +26,8 @@ def add_fit_band(ax, fit_result, fit_form, props):
     colour, _ = props.burn()
     ax.fill_between(
         L_M_pi,
-        delta_fv_S * (const_coefficient_value - const_coefficient_error),
-        delta_fv_S * (const_coefficient_value + const_coefficient_error),
+        -delta_fv_S * (const_coefficient_value - const_coefficient_error),
+        -delta_fv_S * (const_coefficient_value + const_coefficient_error),
         color=colour,
         alpha=0.3,
         label=r"Fit: $-\Delta^{\mathrm{FV}} S(LM_\pi)$",
