@@ -3,6 +3,7 @@
 from argparse import ArgumentParser, FileType
 from functools import cache
 
+import numba
 import numpy as np
 import pandas as pd
 from scipy.integrate import quad_vec
@@ -93,6 +94,7 @@ def get_args():
     return parser.parse_args()
 
 
+@numba.jit(nopython=True)
 def integrand(momentum, time, length, pi_mass, num_wrappings):
     """
     Inner portion of Eq. (49)
