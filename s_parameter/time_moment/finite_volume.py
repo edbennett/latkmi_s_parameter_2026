@@ -29,7 +29,7 @@ total_taste_multiplicity = sum(taste_multiplicities.values())
 
 @cache
 def wrapping_multiplicities():
-    max_num_wrappings_squared = 100
+    max_num_wrappings_squared = 50
     max_num_wrappings = int(max_num_wrappings_squared**0.5) + 1
 
     result = {
@@ -100,10 +100,18 @@ def integrand(momentum, time, length, pi_mass, num_wrappings):
     Inner portion of Eq. (49)
     """
     # Rightmost portion, setting \hat{M}_{\pi,\xi} = 1 as discussed in text,
-    # cancelling the L, and multiplying the M_\pi through
+    # cancelling the L in the exponent,
+    # and cancelling factors of the pi mass with the normalised momentum/masses
     momentum_factor = momentum**2 + pi_mass**2
+
+    # Avoid performing computation that will ultimately give zero
+    if np.all(2 * time * (momentum_factor) ** 0.5 > 60):
+        return np.zeros_like(pi_mass)
+
     summand = np.exp(-2 * time * (momentum_factor) ** 0.5) / momentum_factor
 
+    # Combine with the part to the left of the sum sign,
+    # taking sum(summand) = n_\xi * summand as m_hat is constant as mentioned above
     return (
         momentum**3
         / (2 * np.pi**2)
@@ -169,7 +177,7 @@ def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time):
     The full Eq. (49)
     """
     return (
-        pi_mass**3
+        1
         / 3
         * half_infinite_sum(
             [
@@ -182,7 +190,7 @@ def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time):
 
 
 def delta_fv_S(
-    length, pi_mass, inner_projected_decay_time=42, outer_projected_decay_time=50
+    length, pi_mass, inner_projected_decay_time=50, outer_projected_decay_time=50
 ):
     """
     Eq. (52), without the $C$ factor.
