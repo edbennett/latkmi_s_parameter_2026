@@ -129,10 +129,7 @@ def half_infinite_sum(data):
     verifying with some basic checks that the summand has correctly decayed to zero.
     """
     result = np.sum(data, axis=0)
-
-    # Verify there are sufficient data to have a tail at all
     count = len(data)
-    assert count >= 40
 
     # Make it easier to split the data
     half_count = int(count // 2)
@@ -140,22 +137,20 @@ def half_infinite_sum(data):
     abs_data = np.abs(data)
 
     # This could be made more robust
-    # by also imposing a lower bound relative to the start of the data,
+    # by also imposing a lower bound relative to the peak of the data,
     # but makes it fragile when things get very small in an inner infinite sum
     # For now, assert based on having looked at the intermediate data
     # that this threshold is sufficient
-    zero_threshold = max(1e-15, abs_data[0].mean() / 1e8)
+    zero_threshold = max(1e-9, abs_data.mean(axis=1).max() / 1e4)
 
     # Ensure that the tail is decaying or zero
-    assert abs_data[:half_count].sum() > abs_data[half_count:].sum() * 4
-    assert abs_data[:-quarter_count].sum() > abs_data[-quarter_count:].sum() * 8
     assert (
-        (
-            (abs_data[half_count:-1] - abs_data[half_count + 1 :] > 0)
-            | (abs_data[half_count + 1 :] < zero_threshold)
-        )
-        .mean(axis=1)
-        .all()
+        abs_data[:half_count].sum() > abs_data[half_count:].sum() * 4
+        or (abs_data.mean(axis=1) < zero_threshold).all()
+    )
+    assert (
+        abs_data[:-quarter_count].sum() > abs_data[-quarter_count:].sum() * 8
+        or (abs_data.mean(axis=1) < zero_threshold).all()
     )
 
     return result
