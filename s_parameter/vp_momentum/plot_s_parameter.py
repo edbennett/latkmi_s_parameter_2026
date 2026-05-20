@@ -52,7 +52,7 @@ def plot_single_series(
         for datum in volume_data
     )
     masses = [datum["mass"] + offset for datum in volume_data]
-    value, error, _ = map(
+    value, error, *_ = map(
         np.array, zip(*[datum_getter(datum) for datum in volume_data])
     )
     ax.errorbar(
