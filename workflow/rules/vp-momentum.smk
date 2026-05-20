@@ -297,7 +297,7 @@ rule vp_chisquare_definitions:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        fit_results=get_ensemble_data(f"light_vpf_fit", "renormalised_pade_fit.json"),
+        fit_results=get_ensemble_data(f"heavy_vpf_fit", "renormalised_pade_fit.json"),
         script="s_parameter/definitions/pade_chisquare.py",
     output:
         definitions="assets/definitions/pade_chisquare.tex",
