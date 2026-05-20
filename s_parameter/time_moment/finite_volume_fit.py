@@ -54,11 +54,13 @@ def fit(data):
         fit_form,
         [datum["delta_fv_S"][0] for datum in data],
         [datum["S_infinite_t"][0] for datum in data],
-        sigma=[datum["S_infinite_t"][0] for datum in data],
+        sigma=[datum["S_infinite_t"][1] for datum in data],
         p0=starting_guess,
         full_output=True,
     )
-    const_coefficient, *S_infinite_volume = zip(fit_mean, fit_covariance.diagonal())
+    const_coefficient, *S_infinite_volume = zip(
+        fit_mean, fit_covariance.diagonal() ** 0.5
+    )
     return {
         "masses": mass_ordering,
         "C": const_coefficient,
