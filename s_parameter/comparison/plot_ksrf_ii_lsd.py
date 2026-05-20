@@ -50,6 +50,7 @@ def plot(latkmi_data, lsd_data):
             linestyle="none",
             marker="s",
             label=label,
+            color="C0",
         )
 
     ax.errorbar(
@@ -60,6 +61,7 @@ def plot(latkmi_data, lsd_data):
         linestyle="none",
         marker="o",
         label="LSD Phys. Rev. D99, 014509",
+        color="C1",
     )
     ax.set_xlim(0, None)
     ax.set_ylim(4, 7)
