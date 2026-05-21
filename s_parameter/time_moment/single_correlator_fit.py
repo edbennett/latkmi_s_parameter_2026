@@ -30,7 +30,7 @@ def fit_form(time, mass_main, amplitude_main, mass_osc, amplitude_osc, max_time)
     return amplitude_main * (
         np.exp(-mass_main * time) + np.exp(-mass_main * (max_time - time))
     ) + amplitude_osc * (-1) ** time * (
-        np.exp(-mass_osc * time) + np.exp(-mass_main * (max_time - time))
+        np.exp(-mass_osc * time) + np.exp(-mass_osc * (max_time - time))
     )
 
 
