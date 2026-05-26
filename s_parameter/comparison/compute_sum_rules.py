@@ -82,9 +82,10 @@ def combine_samples(data):
         # to capture the effect of systematics in unknown directions
         if not isinstance(samples, np.ndarray):
             continue
+        num_samples = len(samples)
         result["fit_result_systematic_samples"][key] = (-1) ** np.arange(
-            len(samples)
-        ) * samples + result["fit_result"][key][0]
+            num_samples
+        ) * samples / num_samples**0.5 + result["fit_result"][key][0]
 
     if (
         "S_infinite_volume" in result["fit_result"]
