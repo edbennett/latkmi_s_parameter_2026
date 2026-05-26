@@ -58,8 +58,8 @@ def add_data(ax, data, key, offset=0, **props):
     ax.errorbar(
         [value + offset for value in x_values],
         y_values,
-        xerr=np.linalg.norm(x_errors),
-        yerr=np.linalg.norm(y_errors),
+        xerr=add_quadrature(*np.array(x_errors)),
+        yerr=add_quadrature(*np.array(y_errors)),
         linestyle="none",
         **props,
     )
