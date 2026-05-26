@@ -39,6 +39,8 @@ def tabulate(data):
                             *datum["fit_result"][f"{channel}_{observable}"],
                             abbreviate=True,
                             latex=True,
+                            length_control="largest",
+                            significant_figures=2,
                         )
                     )
 
