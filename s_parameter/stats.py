@@ -8,18 +8,76 @@ from math import prod
 import numpy as np
 
 
-def jackknife_mean_variance(samples):
+def jackknife_mean_variance(samples, systematic_method=None):
     """
     Given a set of jackknife samples
     (sampled along axis 0, with other axes free),
     compute the mean and standard deviation of the underlying data.
+
+    By default,
+    assume that the samples contain only jackknife data;
+    if a `systematic_method` is specified,
+    then take the appropriate mean of the different systematic models
+    before treating the jackknife sampling.
     """
+    if systematic_method:
+        if systematic_method != "max_deviation":
+            raise NotImplementedError(f"{systematic_method} not currently implemented.")
+        samples = samples.mean(axis=0)
+
     mean = np.mean(samples, axis=0)
     variance = (len(samples) - 1) / len(samples) * ((samples - mean) ** 2).sum(axis=0)
     return mean, variance**0.5
 
 
+def filter_fit_results(samples):
+    """
+    Apply progressively less strict selection criteria to samples
+    until we find a set that we are happy with.
+    """
+    matched_samples = []
+    matched_sample_data = []
+    for chisquare_ubound, chisquare_lbound, dof_lbound, quantity_required in [
+        (1.5, None, 2, 4),
+        (2, None, 2, 2),
+        (1.5, 0.5, None, 2),
+        (2, 0.5, None, 2),
+        (2.5, 0.5, None, 2),
+    ]:
+        for sample in samples:
+            values, errors = sample["fit_result"]
+            if (np.abs(errors / values) > 0.99).any():
+                continue
+            reduced_chisquare = sample["chisquare"][0] / sample["dof"]
+            if reduced_chisquare >= chisquare_ubound:
+                continue
+            if chisquare_lbound is not None and reduced_chisquare <= chisquare_lbound:
+                continue
+            if dof_lbound is not None and sample["dof"] < dof_lbound:
+                continue
+            sample_descriptor = (sample["min_timeslice"], sample["max_timeslice"])
+            if sample_descriptor in matched_samples:
+                continue
+            matched_samples.append(sample_descriptor)
+            matched_sample_data.append(sample)
+        if len(matched_samples) >= quantity_required:
+            return matched_sample_data
+
+    return [sorted(samples, key=lambda sample: sample["chisquare"][0] / sample["dof"])][
+        0
+    ]
+
+
 def sample_systematics(func, min_timeslice, max_timeslice):
+    """
+    Run `func` for a variety of fit intervals,
+    and filter to those results anticipated to be the most reliable.
+    `func` must accept two arguments,
+    the start and end of the fit range,
+    and return a dict containing minimally:
+    - `"chisquare"` - the sum of residuals
+    - `"dof"` - the number of degrees of freedom in the fit
+    """
     fit_samples = []
     for start_timeslice in range(min_timeslice, max_timeslice - 3):
         for end_timeslice in range(start_timeslice + 4, max_timeslice + 1):
@@ -29,41 +87,47 @@ def sample_systematics(func, min_timeslice, max_timeslice):
                 # Not all fits work, and that's OK
                 continue
 
-    return fit_samples
+    return filter_fit_results(fit_samples)
 
 
-def jackknife_systematic_error(samples, result, method="max_deviation"):
+def jackknife_statistical_intermediary(samples, weighting="flat"):
     """
     Given a set of samples of a quantity estimated with different systematics
     (sampled along axis 0, with other axes free),
     and the final central value estimate,
-    compute an estimate of the systematic error.
+    return the contribution to the statistics from each jackknife sample,
+    weighting for the appropriate systematic sampling `weighting`.
+
+    (Currently only `"flat"` is supported.)
     """
-    if method != "max_deviation":
-        raise NotImplementedError(f"{method} not currently implemented")
+    if weighting != "flat":
+        raise NotImplementedError(f"{weighting} not currently implemented.")
+    return samples.mean(axis=0)
 
-    return np.abs(samples - result).max(axis=0)
 
-
-def jackknife_systematic_intermediary(samples, result, method="max_deviation"):
-    """
+def jackknife_systematic_intermediary(samples, method="max_deviation"):
+    r"""
     Given a set of samples of a quantity estimated with different systematics
     (sampled along axis 0, with other axes free),
     and the final central value estimate,
-    return the value from each sample set giving the contribution to the systematic.
+    return the contribution to the systematic error from each jackknife sample.
+
+    (Currently only `"max_deviation"` is supported.
+    This gives $\sqrt(1/N \max (sample - mean(samples)))$
     """
     if method != "max_deviation":
         raise NotImplementedError(f"{method} not currently implemented")
 
-    # Need to explicitly convert `samples` since `take_along_axis` requires an ndarray
-    samples = np.array(samples)
+    if samples.shape[0] < 2:
+        return np.array([[np.nan]])
 
-    differences = np.abs(samples - result)
-
-    # Return the positions in `samples` at which `abs(samples - result)` is maximum
-    return np.take_along_axis(
-        samples, differences.argmax(axis=0, keepdims=True), axis=0
-    ).squeeze(axis=0)
+    return np.array(
+        [
+            np.max(np.abs(sample - np.mean(sample, axis=0)), axis=0)
+            / len(sample) ** 0.5
+            for sample in samples.swapaxes(0, 1)
+        ]
+    )
 
 
 def sample_jackknife(data, free_axes=-1):

@@ -10,7 +10,7 @@ from .sparam_tm import compute_S_parameter_contribution
 from ..io import read_numpy, dump_numpy
 from ..stats import (
     jackknife_mean_variance,
-    jackknife_systematic_error,
+    jackknife_statistical_intermediary,
     jackknife_systematic_intermediary,
     sample_systematics,
 )
@@ -108,15 +108,11 @@ def extrapolate_S_infinite_t(fit_samples, m_rho, m_a_1, t_0, S_t_0):
     # Eq. (28) uses 4pi * (-1/2!); this is simplified to -2pi here.
     contributions = -np.pi / 2 * (fit_samples * factors)
     result = {
-        f"S_{name}": (value, error)
-        for name, value, error in zip(
-            ["A_plus", "A_minus", "V_plus", "V_minus"],
-            *jackknife_mean_variance(contributions),
-        )
+        name: contributions[..., idx]
+        for idx, name in enumerate(["S_A_plus", "S_A_minus", "S_V_plus", "S_V_minus"])
     }
     S_samples = S_t_0 + contributions.sum(axis=1)
-    result["S_infinite_t_samples"] = S_samples
-    result["S_infinite_t"] = jackknife_mean_variance(S_samples)
+    result["S_infinite_t"] = S_samples
 
     return result
 
@@ -177,9 +173,10 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     data_values, data_uncertainty = jackknife_mean_variance(data)
 
     fit_samples = []
+    chisquares = []
     times = np.arange(min_timeslice, max_timeslice)
     for sample, m_rho_sample, m_a_1_sample in zip(data, m_rho, m_a_1):
-        result, *others = curve_fit(
+        result, _, info, _, _ = curve_fit(
             partial(
                 fit_form,
                 m_a_1=m_a_1_sample,
@@ -193,14 +190,12 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
             full_output=True,
         )
         fit_samples.append(result)
-
-    values, errors = jackknife_mean_variance(fit_samples)
-    C_A_plus, C_A_minus, C_V_plus, C_V_minus = zip(values, errors)
+        chisquares.append((info["fvec"] ** 2).sum())
 
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
         :, min_timeslice
     ]
-    extrapolated_S = extrapolate_S_infinite_t(
+    result_samples = extrapolate_S_infinite_t(
         fit_samples,
         m_rho,
         m_a_1,
@@ -208,32 +203,50 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         start_S_samples,
     )
 
-    residual = fit_form(
-        times, *values, m_rho.mean(), m_a_1.mean(), 2 * (data.shape[-1] - 1)
+    fit_samples_array = np.array(fit_samples)
+
+    result = {
+        "fit_result": jackknife_mean_variance(fit_samples),
+        "fit_result_samples": result_samples,
+        "chisquare": jackknife_mean_variance(chisquares),
+        "dof": max_timeslice - min_timeslice + 1 - len(result),
+        "S_infinite_t": jackknife_mean_variance(result_samples["S_infinite_t"]),
+        "bare_result_samples": fit_samples_array,
+        "min_timeslice": min_timeslice,
+        "max_timeslice": max_timeslice,
+    }
+
+    for idx, name in enumerate(["A_plus", "A_minus", "V_plus", "V_minus"]):
+        samples = fit_samples_array[..., idx]
+        result_samples[f"C_{name}"] = samples
+        result[f"C_{name}"] = jackknife_mean_variance(samples)
+        result[f"S_{name}"] = jackknife_mean_variance(result_samples[f"S_{name}"])
+
+    return result
+
+
+def get_chisquare(full_data, fit_samples, m_rho, m_a_1, min_timeslice, max_timeslice):
+    data = full_data["Conserved"]["V-A_renormalised_samples"]
+    data_values, data_uncertainty = jackknife_mean_variance(data)
+    fit_values, _ = jackknife_mean_variance(fit_samples)
+    times = np.arange(min_timeslice, max_timeslice)
+
+    func_at_fit_result = fit_form(
+        times, *fit_values, m_rho.mean(), m_a_1.mean(), 2 * (data.shape[-1] - 1)
     )
-    chisquare = (
+    return (
         (
-            (residual - data_values[min_timeslice:max_timeslice])
+            (func_at_fit_result - data_values[min_timeslice:max_timeslice])
             / data_uncertainty[min_timeslice:max_timeslice]
         )
         ** 2
     ).sum()
-    return {
-        "fit_result_samples": np.array(fit_samples),
-        "C_V_plus": C_V_plus,
-        "C_A_plus": C_A_plus,
-        "C_V_minus": C_V_minus,
-        "C_A_minus": C_A_minus,
-        "chisquare": chisquare,
-        "dof": max_timeslice - min_timeslice + 1 - len(values),
-        **extrapolated_S,
-    }
 
 
 def add_systematic(result, all_samples, key):
     value, error = result[key]
-    samples = [sample[key][0] for sample in all_samples]
-    systematic = jackknife_systematic_error(samples, value)
+    samples = np.array([sample["fit_result_samples"][key] for sample in all_samples])
+    systematic = jackknife_systematic_intermediary(samples).mean()
     return value, error, systematic
 
 
@@ -241,10 +254,12 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     def fit_time_range(min_timeslice, max_timeslice):
         return fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice)
 
-    full_range_result = fit_time_range(min_timeslice, max_timeslice)
-    systematic_samples = sample_systematics(
-        fit_time_range, min_timeslice, max_timeslice
-    )
+    result = {
+        "fit_result": {},
+        "fit_result_samples": {},
+        "fit_result_systematic_samples": {},
+    }
+    all_samples = sample_systematics(fit_time_range, min_timeslice, max_timeslice)
 
     for key in [
         *[
@@ -255,24 +270,40 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         ],
         "S_infinite_t",
     ]:
-        full_range_result[key] = add_systematic(
-            full_range_result, systematic_samples, key
+        obs_samples = np.array(
+            [sample["fit_result_samples"][key] for sample in all_samples]
         )
+        statistical_samples = jackknife_statistical_intermediary(obs_samples, "flat")
+        result["fit_result_samples"][key] = statistical_samples
 
-    full_range_result["S_infinite_t_systematic_samples"] = (
-        jackknife_systematic_intermediary(
-            [sample["S_infinite_t_samples"] for sample in systematic_samples],
-            full_range_result["S_infinite_t_samples"],
+        value, error = jackknife_mean_variance(statistical_samples)
+
+        systematic_samples = jackknife_systematic_intermediary(obs_samples)
+        result["fit_result_systematic_samples"][key] = systematic_samples
+
+        systematic_error = systematic_samples.mean()
+        result[key] = (value, error, systematic_error)
+
+    result["S_infinite_t_systematic_samples"] = jackknife_systematic_intermediary(
+        np.array(
+            [sample["fit_result_samples"]["S_infinite_t"] for sample in all_samples]
         )
     )
-    fit_samples = full_range_result["fit_result_samples"]
+    fit_samples = jackknife_statistical_intermediary(
+        np.array([sample["bare_result_samples"] for sample in all_samples]), "flat"
+    )
+    result["chisquare"] = get_chisquare(
+        full_data, fit_samples, m_rho, m_a_1, min_timeslice, max_timeslice
+    )
+    result["dof"] = max_timeslice - min_timeslice + 1 - 4
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
         :, min_timeslice - 1
     ]
-    full_range_result["S_extrapolation_large_t"] = extrapolate_S_finite_t(
+    result["bare_result_samples"] = fit_samples
+    result["S_extrapolation_large_t"] = extrapolate_S_finite_t(
         fit_samples, m_rho, m_a_1, min_timeslice, full_data["Nt"], start_S_samples
     )
-    full_range_result["S_correlator_interpolation"] = interpolate_correlator_and_S(
+    result["S_correlator_interpolation"] = interpolate_correlator_and_S(
         fit_samples,
         m_rho,
         m_a_1,
@@ -281,7 +312,7 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         full_data["Nt"],
         start_S_samples,
     )
-    full_range_result["S_correlator_extrapolation"] = interpolate_correlator_and_S(
+    result["S_correlator_extrapolation"] = interpolate_correlator_and_S(
         fit_samples,
         m_rho,
         m_a_1,
@@ -291,7 +322,7 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         start_S_samples,
     )
 
-    return full_range_result
+    return result
 
 
 def get_max_timeslice(data, max_timeslice):

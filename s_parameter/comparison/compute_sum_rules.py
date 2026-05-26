@@ -7,11 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ..io import read_numpy, dump_numpy
-from ..stats import (
-    jackknife_mean_variance,
-    generate_jackknife,
-    jackknife_systematic_error,
-)
+from ..stats import jackknife_mean_variance, generate_jackknife
 
 
 METADATA_KEYS = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
@@ -80,6 +76,15 @@ def combine_samples(data):
             result["fit_result_systematic_samples"][key] = datum[
                 "fit_result_systematic_samples"
             ][key]
+
+    for key, samples in result["fit_result_systematic_samples"].items():
+        # Randomise the direction of the variation,
+        # to capture the effect of systematics in unknown directions
+        if not isinstance(samples, np.ndarray):
+            continue
+        result["fit_result_systematic_samples"][key] = (-1) ** np.arange(
+            len(samples)
+        ) * samples + result["fit_result"][key][0]
 
     if (
         "S_infinite_volume" in result["fit_result"]
@@ -248,7 +253,10 @@ def compute_sum_rules(data, prefixes_to_skip=[]):
                 func({**data, **data["fit_result_samples"]})
             )
             systematic_samples = func({**data, **data["fit_result_systematic_samples"]})
-            systematic = jackknife_systematic_error(systematic_samples, central)
+            if isinstance(systematic_samples, float):
+                systematic = np.nan
+            else:
+                _, systematic = jackknife_mean_variance(systematic_samples)
             result[name] = [central, statistical, systematic]
         except KeyError as key:
             message = f"Key {key} not found in data. Skipping computation of {name}."

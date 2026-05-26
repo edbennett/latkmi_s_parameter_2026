@@ -80,7 +80,7 @@ class EnsembleManager:
             value = self._spectrum[f"value_{channel}"]
             error = self._spectrum[f"error_{channel}"]
             self._samples[channel] = generate_jackknife(
-                value, error, self._datum, self._datum["fit_result_samples"].shape[0]
+                value, error, self._datum, self._datum["bare_result_samples"].shape[0]
             )
 
         return self._samples[channel]
@@ -211,7 +211,12 @@ def main():
         {
             "delta_fv_S_samples": result,
             "delta_fv_S": jackknife_mean_variance(result),
-            "S_infinite_t_samples": s_parameter_vp["S_infinite_t_samples"],
+            "S_infinite_t_systematic_samples": s_parameter_vp[
+                "S_infinite_t_systematic_samples"
+            ],
+            "S_infinite_t_samples": s_parameter_vp["fit_result_samples"][
+                "S_infinite_t"
+            ],
             "S_infinite_t": s_parameter_vp["S_infinite_t"],
             "pi_mass_samples": ensemble.get_samples("mpi"),
             **{key: s_parameter_vp[key] for key in METADATA_KEYS},

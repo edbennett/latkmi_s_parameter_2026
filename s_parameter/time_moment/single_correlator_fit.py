@@ -10,7 +10,7 @@ from scipy.optimize import curve_fit
 from ..io import read_numpy, dump_numpy
 from ..stats import (
     jackknife_mean_variance,
-    jackknife_systematic_error,
+    jackknife_statistical_intermediary,
     jackknife_systematic_intermediary,
     sample_systematics,
 )
@@ -40,66 +40,81 @@ def decay_const(mass, amplitude):
 
 
 def fit_single(samples, min_timeslice, max_timeslice, starting_guess=None):
-    _, data_uncertainty = jackknife_mean_variance(samples)
-
     range_fit_form = partial(fit_form, max_time=(samples[0].shape[-1] - 1) * 2)
-    target_range = np.arange(min_timeslice, max_timeslice)
-    target_slice = slice(min_timeslice, max_timeslice)
+    target_range = np.arange(min_timeslice, max_timeslice + 1)
+    target_slice = slice(min_timeslice, max_timeslice + 1)
+    covariance = np.cov(samples.T)[target_slice, target_slice] * (len(samples) - 1)
+
+    fit_samples = []
+    residuals = []
 
     if starting_guess is None:
-        starting_guess, _ = curve_fit(
-            range_fit_form,
-            target_range,
-            samples.mean(axis=0)[target_slice],
-            sigma=data_uncertainty[target_slice],
-            p0=[1.0, 1.0, 1.0, -1.0],
-        )
+        starting_guess = [1.0, -1.0, 1.0, 1.0]
+    else:
+        print(f"{starting_guess=}")
 
-    results = []
     for sample in samples:
-        (mass_main, amplitude_main, mass_osc, amplitude_osc), _ = curve_fit(
+        uncorrelated_result, _ = curve_fit(
             range_fit_form,
             target_range,
             sample[target_slice],
-            sigma=data_uncertainty[target_slice],
+            sigma=covariance.diagonal(),
             p0=starting_guess,
+            bounds=([1e-6, -np.inf, 1e-6, -np.inf], [np.inf, np.inf, np.inf, np.inf]),
         )
+
+        fit_values, _, info, _, _ = curve_fit(
+            range_fit_form,
+            target_range,
+            sample[target_slice],
+            sigma=covariance,
+            p0=uncorrelated_result,
+            bounds=([1e-6, -np.inf, 1e-6, -np.inf], [np.inf, np.inf, np.inf, np.inf]),
+            full_output=True,
+        )
+        mass_main, amplitude_main, mass_osc, amplitude_osc = fit_values
         decay_const_main = decay_const(mass_main, amplitude_main)
         decay_const_osc = decay_const(mass_osc, amplitude_osc)
-        results.append(
-            [
-                mass_main,
-                amplitude_main,
-                decay_const_main,
-                mass_osc,
-                amplitude_osc,
-                decay_const_osc,
-            ]
-        )
-    return results
+        expanded_values = [
+            mass_main,
+            amplitude_main,
+            decay_const_main,
+            mass_osc,
+            amplitude_osc,
+            decay_const_osc,
+        ]
+
+        fit_samples.append(expanded_values)
+        residuals.append((info["fvec"] ** 2).sum())
+
+    return {
+        "fit_result": jackknife_mean_variance(fit_samples),
+        "fit_result_samples": fit_samples,
+        "chisquare": jackknife_mean_variance(residuals),
+        "dof": max_timeslice - min_timeslice + 1 - 4,
+        "min_timeslice": min_timeslice,
+        "max_timeslice": max_timeslice,
+    }
 
 
-def fit_systematic(samples, result, min_timeslice, max_timeslice):
-    starting_guess = [result[i] for i in [0, 1, 3, 4]]
-
+def fit_systematic(samples, min_timeslice, max_timeslice):
     def fit_time_range(min_timeslice, max_timeslice):
-        return fit_single(
-            samples, min_timeslice, max_timeslice, starting_guess=starting_guess
-        )
+        return fit_single(samples, min_timeslice, max_timeslice)
 
-    return jackknife_systematic_intermediary(
-        sample_systematics(fit_time_range, min_timeslice, max_timeslice), result
+    systematic_samples = sample_systematics(
+        fit_time_range, min_timeslice, max_timeslice
     )
+    return np.array([sample["fit_result_samples"] for sample in systematic_samples])
 
 
 def fit(full_data, min_timeslice, max_timeslice, channel):
-    # Negate samples to have positive data to fit
-    data = -full_data["Conserved"][f"{channel}_renormalised_samples"]
+    data = full_data["OneLink"][f"{channel}_renormalised_samples"]
 
-    fit_samples = fit_single(data, min_timeslice, max_timeslice)
-    values, errors = jackknife_mean_variance(fit_samples)
-    systematic_samples = fit_systematic(data, values, min_timeslice, max_timeslice)
-    systematic_errors = jackknife_systematic_error(systematic_samples, values)
+    all_samples = fit_systematic(data, min_timeslice, max_timeslice)
+    statistical_samples = jackknife_statistical_intermediary(all_samples, "flat")
+    values, errors = jackknife_mean_variance(statistical_samples)
+    systematic_samples = jackknife_systematic_intermediary(all_samples)
+    systematic_errors = systematic_samples.mean(axis=0)
 
     states = {
         "V": {"main": "rho", "osc": "V_osc"},
@@ -114,7 +129,7 @@ def fit(full_data, min_timeslice, max_timeslice, channel):
             )
         }
         for key, values in [
-            ("fit_result_samples", fit_samples),
+            ("fit_result_samples", statistical_samples),
             ("fit_result_systematic_samples", systematic_samples),
             ("fit_result", [values, errors, systematic_errors]),
         ]
