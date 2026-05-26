@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+import numpy as np
 import pandas as pd
 
 from .io import read_numpy
@@ -127,7 +128,7 @@ def iterate_lengths(data):
 
 def plot_new_series(ax, data, key, colour, marker, label, offset=0):
     masses = [datum["mass"] + offset for datum in data]
-    values, *errors = zip(*[datum[key] for datum in data])
+    values, *errors = np.array([datum[key] for datum in data]).T
     ax.errorbar(
         masses,
         values,
