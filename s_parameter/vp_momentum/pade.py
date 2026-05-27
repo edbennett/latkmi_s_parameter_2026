@@ -14,22 +14,25 @@ def pade(momentum_squared, b0, b1, c1, c2):
     )
 
 
-def get_momentum_filter(momentum, lattice_volume, momentum_squared_upper_bound=1):
+def get_momentum_filter(
+    momentum,
+    lattice_volume,
+    momentum_squared_upper_bound=1,
+    max_momentum_units_per_direction=2,
+):
     """
     Return a boolean array of which rows of `momentum` meet the constraints:
-    - Each component ≤ twice the unit momentum in any direction
-    - Each component ≤ 1
+    - Each component ≤ max_momentum_units_per_direction
+                       times the unit momentum in any direction
+    - Magnitude of momentum squared ≤ momentum_squared_upper_bound
     """
     momentum_squared = (momentum**2).sum(axis=1)
 
-    # Allow for the fact that the momentum_units from the log files
-    # don't exactly match our assumptions here
-    rounding_fudge = 1.001
-
-    max_q_units = 3
     brillouin_zone_size = 2 * np.pi
 
-    return (
-        momentum
-        <= rounding_fudge * max_q_units * brillouin_zone_size / np.array(lattice_volume)
-    ).all(axis=1) & (momentum_squared < momentum_squared_upper_bound)
+    momentum_integer_units = np.rint(
+        momentum / (brillouin_zone_size / np.array(lattice_volume))
+    )
+    return (momentum_integer_units <= max_momentum_units_per_direction).all(axis=1) & (
+        momentum_squared < momentum_squared_upper_bound
+    )
