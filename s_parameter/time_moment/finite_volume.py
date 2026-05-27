@@ -6,7 +6,7 @@ from functools import cache
 import numba
 import numpy as np
 import pandas as pd
-from scipy.integrate import quad_vec
+from scipy.integrate import quad_vec, nsum
 
 from ..io import read_numpy, dump_numpy
 from ..stats import generate_jackknife, jackknife_mean_variance
@@ -53,7 +53,7 @@ def wrapping_multiplicities():
             for z_count in range(1, max_num_wrappings):
                 add_single_contribution(16, x_count, y_count, z_count)
 
-    return result
+    return np.array([result[idx] for idx in range(max_num_wrappings_squared + 1)])
 
 
 class EnsembleManager:
@@ -167,21 +167,21 @@ def integral(time, length, pi_mass, num_wrappings_squared):
     return result[0]
 
 
-def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time):
+def delta_fv_g_pi_pi(time, length, pi_mass, projected_decay_time, tol=1e-9):
     """
     The full Eq. (49)
     """
-    return (
-        1
-        / 3
-        * half_infinite_sum(
-            [
-                wrapping_multiplicities()[num_wrappings_squared]
-                * integral(time, length, pi_mass, num_wrappings_squared)
-                for num_wrappings_squared in range(1, projected_decay_time)
-            ]
-        )
+    sum_result = nsum(
+        lambda num_wrappings_squared, *args: (
+            wrapping_multiplicities()[np.int64(num_wrappings_squared)]
+            * integral(*args, num_wrappings_squared)
+        ),
+        1,
+        projected_decay_time,
+        args=(time, length, pi_mass),
     )
+    assert (sum_result.error < np.abs(sum_result.sum) * tol).all()
+    return 1 / 3 * sum_result.sum
 
 
 def delta_fv_S(
