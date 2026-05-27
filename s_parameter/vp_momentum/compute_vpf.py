@@ -42,7 +42,13 @@ def reorder_momentum(momentum):
 
 def project(data):
     momentum = data["momentum_direction"] * data["momentum_units"]
-    momentum_squared = (momentum**2).sum(axis=1)
+    # We will index on momentum_squared,
+    # so coerce all extremely close numbers to be the same
+    # In principle this introduces a very small systematic effect,
+    # but at least ten orders of magnitude smaller than the signal
+    # If this affects our results,
+    # we are working far too close to machine precision to trust them either way.
+    momentum_squared = (momentum**2).sum(axis=1).round(15)
 
     sort_index = np.argsort(momentum_squared)
     unique_momentum_squared, momentum_groups, momentum_group_count = np.unique(
