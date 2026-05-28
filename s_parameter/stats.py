@@ -236,7 +236,8 @@ def add_quadrature(*values):
     for value in values:
         if isinstance(value, tuple):
             if len(value) == 2:
-                numerator, denominator = value
+                # Use unusual ordering so that (value, error) pairs work
+                denominator, numerator = value
                 total += (numerator / denominator) ** 2
             elif len(value) == 1:
                 total += value[0] ** 2

@@ -29,10 +29,10 @@ def get_definitions(chiral_fit_result_latkmi, chiral_spectrum_lsd):
 
     value_ratio = value_lsd_mass / value_latkmi_mass
     error_ratio = value_ratio * add_quadrature(
-        (error_lsd_mass, value_lsd_mass),
-        (systematic_error_lsd_mass, value_lsd_mass),
-        (error_latkmi_mass, value_latkmi_mass),
-        (systematic_error_latkmi_mass, value_latkmi_mass),
+        (value_lsd_mass, error_lsd_mass),
+        (value_lsd_mass, systematic_error_lsd_mass),
+        (value_latkmi_mass, error_latkmi_mass),
+        (value_latkmi_mass, systematic_error_latkmi_mass),
     )
 
     return define("Lattice_Spacing_Ratio_LSD_LatKMI", (value_ratio, error_ratio))

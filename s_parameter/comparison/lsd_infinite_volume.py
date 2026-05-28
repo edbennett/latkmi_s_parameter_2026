@@ -73,8 +73,8 @@ def add_pi_over_chiral_rho_mass(input_data, chiral_data):
 
     value_ratio = data["value_pi_mass"] / value_chiral_rho_mass
     error_ratio = value_ratio * add_quadrature(
-        (data["error_pi_mass"], data["value_pi_mass"]),
-        (error_chiral_rho_mass, value_chiral_rho_mass),
+        (data["value_pi_mass"], data["error_pi_mass"]),
+        (value_chiral_rho_mass, error_chiral_rho_mass),
     )
     data["value_pi_mass_over_chiral_rho_mass"] = value_ratio
     data["error_pi_mass_over_chiral_rho_mass"] = error_ratio
