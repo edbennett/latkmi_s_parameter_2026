@@ -38,15 +38,22 @@ def extrapolate_single(datum, fit_result):
     # Add metadata for compatibility with generate_jackknife_samples
     datum["mass"] = datum["m_f"]
     datum["bin_size"] = 1
+
     pi_mass = _generate_jackknife(datum, "pi_mass")
-    finite_volume_factor = delta_fv_S(datum["Nx"], pi_mass)
-    finite_volume_S = _generate_jackknife(datum, "S_lattice")
-    const_coefficient = generate_jackknife(
-        *fit_result["fit_result"]["C"], datum, JACKKNIFE_SAMPLE_SIZE
+    finite_volume_factor = jackknife_mean_variance(delta_fv_S(datum["Nx"], pi_mass))
+
+    value_finite_volume_S = datum["value_S_lattice"]
+    const_coefficient = fit_result["fit_result"]["C"]
+    value_extrapolation = (
+        value_finite_volume_S - const_coefficient[0] * finite_volume_factor[0]
     )
-    return jackknife_mean_variance(
-        finite_volume_S - const_coefficient * finite_volume_factor
+    error_extrapolation = add_quadrature(
+        datum["error_S_lattice"],
+        const_coefficient[0]
+        * finite_volume_factor[0]
+        * add_quadrature(tuple(const_coefficient), tuple(finite_volume_factor)),
     )
+    return value_extrapolation, error_extrapolation
 
 
 def extrapolate(s_parameter_data, fit_result):
