@@ -7,6 +7,7 @@ import pandas as pd
 
 from ..io import read_numpy
 from ..plot import save_or_show
+from ..stats import add_quadrature
 
 
 def get_args():
@@ -89,11 +90,15 @@ def add_lsd_data(ax, data):
     value_mpi_over_mrho = data["value_pi_mass_over_chiral_rho_mass"]
     error_mpi_over_mrho = data["error_pi_mass_over_chiral_rho_mass"]
 
+    extrapolation_systematic = data["value_S_infinite_volume"] - data["value_S_lattice"]
+    extrapolation_uncertainty = add_quadrature(
+        extrapolation_systematic, data["error_S_infinite_volume"]
+    )
     ax.errorbar(
         value_mpi_over_mrho,
         data["value_S_infinite_volume"],
         xerr=error_mpi_over_mrho,
-        yerr=data["error_S_infinite_volume"],
+        yerr=extrapolation_uncertainty,
         color="C1",
         marker="x",
         linestyle="none",
