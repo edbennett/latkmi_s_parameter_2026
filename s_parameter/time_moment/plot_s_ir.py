@@ -37,7 +37,9 @@ def plot(data):
         ("A", "+", "^"),
         ("V", "-", "v"),
     ]:
-        values_errors = [datum[f"S_{channel}_{sign_names[parity]}"] for datum in data]
+        values_errors = [
+            datum[f"model_S_{channel}_{sign_names[parity]}"] for datum in data
+        ]
         values = [contributions[0] for contributions in values_errors]
         combined_errors = [add_quadrature(*errors) for _, *errors in values_errors]
         label = (

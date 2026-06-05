@@ -202,6 +202,7 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         min_timeslice,
         start_S_samples,
     )
+    model_result_samples = extrapolate_S_infinite_t(fit_samples, m_rho, m_a_1, 1, 0)
 
     fit_samples_array = np.array(fit_samples)
 
@@ -221,6 +222,10 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         result_samples[f"C_{name}"] = samples
         result[f"C_{name}"] = jackknife_mean_variance(samples)
         result[f"S_{name}"] = jackknife_mean_variance(result_samples[f"S_{name}"])
+        result_samples[f"model_S_{name}"] = model_result_samples[f"S_{name}"]
+        result[f"model_S_{name}"] = jackknife_mean_variance(
+            model_result_samples[f"S_{name}"]
+        )
 
     return result
 
@@ -255,7 +260,6 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         return fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice)
 
     result = {
-        "fit_result": {},
         "fit_result_samples": {},
         "fit_result_systematic_samples": {},
     }
@@ -264,7 +268,7 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     for key in [
         *[
             f"{obs}_{channel}_{sign}"
-            for obs in ["S", "C"]
+            for obs in ["model_S", "S", "C"]
             for channel in ["V", "A"]
             for sign in ["plus", "minus"]
         ],
