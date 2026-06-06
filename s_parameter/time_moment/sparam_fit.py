@@ -193,7 +193,7 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         chisquares.append((info["fvec"] ** 2).sum())
 
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
-        :, min_timeslice
+        :, min_timeslice - 1
     ]
     result_samples = extrapolate_S_infinite_t(
         fit_samples,
