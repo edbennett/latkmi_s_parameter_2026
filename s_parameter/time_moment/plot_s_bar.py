@@ -47,6 +47,13 @@ def plot_single_data(ax, data, label, colour):
     )
 
 
+def plot_single_band(ax, value_with_error, label, colour):
+    value, error, *_ = value_with_error
+    ax.axhline(value, color=colour, zorder=-1, label=label)
+    ax.axhline(value + error, linestyle=":", color=colour, zorder=-1)
+    ax.axhline(value - error, linestyle=":", color=colour, zorder=-1)
+
+
 def plot(data, fit_result):
     fig, ax = plt.subplots()
 
@@ -54,6 +61,9 @@ def plot(data, fit_result):
     ax.set_ylabel(r"$\overline{S}(\overline{t})$")
 
     plot_single_data(ax, data["Conserved"]["S_parameter_eff"], "Data", "C0")
+    plot_single_band(
+        ax, fit_result["S_infinite_t"], r"$\overline{t} \rightarrow \infty$", "C3"
+    )
     plot_single_fit(
         ax, fit_result["S_extrapolation_large_t"], r"$T \rightarrow \infty$", "C2"
     )
