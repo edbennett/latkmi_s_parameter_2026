@@ -263,7 +263,12 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         "fit_result_samples": {},
         "fit_result_systematic_samples": {},
     }
-    all_samples = sample_systematics(fit_time_range, min_timeslice, max_timeslice)
+    all_samples = sample_systematics(
+        fit_time_range,
+        min_timeslice,
+        max_timeslice,
+        min_end_timeslice=full_data["Nt"] // 2 - 2,
+    )
 
     for key in [
         *[

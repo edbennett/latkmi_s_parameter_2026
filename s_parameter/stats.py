@@ -68,7 +68,7 @@ def filter_fit_results(samples):
     ]
 
 
-def sample_systematics(func, min_timeslice, max_timeslice):
+def sample_systematics(func, min_timeslice, max_timeslice, min_end_timeslice=0):
     """
     Run `func` for a variety of fit intervals,
     and filter to those results anticipated to be the most reliable.
@@ -80,7 +80,9 @@ def sample_systematics(func, min_timeslice, max_timeslice):
     """
     fit_samples = []
     for start_timeslice in range(min_timeslice, max_timeslice - 3):
-        for end_timeslice in range(start_timeslice + 4, max_timeslice + 1):
+        for end_timeslice in range(
+            max(min_end_timeslice, start_timeslice + 4), max_timeslice + 1
+        ):
             try:
                 fit_samples.append(func(start_timeslice, end_timeslice))
             except RuntimeError:
