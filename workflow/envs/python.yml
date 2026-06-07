@@ -31,7 +31,7 @@ dependencies:
       - decorator==5.3.1
       - executing==2.2.1
       - fonttools==4.61.1
-      - format-multiple-errors==0.0.3
+      - format-multiple-errors==0.0.4
       - ipython==9.13.0
       - ipython-pygments-lexers==1.1.1
       - jedi==0.20.0
