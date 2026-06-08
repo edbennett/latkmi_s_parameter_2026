@@ -168,26 +168,30 @@ def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, max_time, 
 def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     data = full_data["Conserved"]["V-A_renormalised_samples"]
 
-    assert data.shape[:-1] == m_rho.shape
-    assert data.shape[:-1] == m_a_1.shape
-    data_values, data_uncertainty = jackknife_mean_error(data)
+    samples_shape = data.shape[:-1]
+    assert samples_shape == m_rho.shape
+    assert samples_shape == m_a_1.shape
+    covariance = np.cov(data[:, min_timeslice:max_timeslice].transpose()) * (
+        np.prod(samples_shape) - 1
+    )
 
     fit_samples = []
     chisquares = []
     times = np.arange(min_timeslice, max_timeslice)
     for sample, m_rho_sample, m_a_1_sample in zip(data, m_rho, m_a_1):
-        result, _, info, _, _ = curve_fit(
-            partial(
-                fit_form,
-                m_a_1=m_a_1_sample,
-                m_rho=m_rho_sample,
-                max_time=2 * (data.shape[-1] - 1),
-            ),
-            times,
-            sample[min_timeslice:max_timeslice],
-            sigma=data_uncertainty[min_timeslice:max_timeslice],
-            bounds=([0, -1, -1, 0], [1, 0, 0, 1]),
-            full_output=True,
+        sample_fit_form = partial(
+            fit_form,
+            m_a_1=m_a_1_sample,
+            m_rho=m_rho_sample,
+            max_time=2 * (data.shape[-1] - 1),
+        )
+        sample_slice = sample[min_timeslice:max_timeslice]
+        bounds = ([0, -1, -1, 0], [1, 0, 0, 1])
+        fitter = partial(curve_fit, sample_fit_form, times, sample_slice, bounds=bounds)
+
+        first_result, _ = fitter(sigma=covariance.diagonal() ** 0.5)
+        result, _, info, _, _ = fitter(
+            sigma=covariance, p0=first_result, full_output=True
         )
         fit_samples.append(result)
         chisquares.append((info["fvec"] ** 2).sum())
