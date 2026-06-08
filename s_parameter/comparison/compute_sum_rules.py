@@ -27,6 +27,15 @@ def get_common_shape(all_samples):
     return result
 
 
+def get_systematic(candidates, match_result):
+    (matched_candidate,) = [
+        candidate
+        for candidate in candidates
+        if all(candidate[key] == match_result[key] for key in ["Nx", "Ny", "Nz", "Nt"])
+    ]
+    return matched_candidate["systematic"]
+
+
 def combine_samples(data):
     """
     Combine results of multiple different fits into a single dict for ease of processing.
@@ -49,16 +58,15 @@ def combine_samples(data):
                 raise ValueError(f"Data mismatch: {result[key]} != {datum[key]}")
 
         if "S_infinite_volume" in datum:
-            result["fit_result"]["S_infinite_volume"] = datum["S_infinite_volume"]
+            value, error = datum["S_infinite_volume"]
             if "S_infinite_volume_samples" in datum:
                 result["fit_result_samples"]["S_infinite_volume"] = datum[
                     "S_infinite_volume_samples"
                 ]
-            # TODO Adjust when systematics added to infinite volume extrapolation?
-            # If they are?
-            result["fit_result_systematic_samples"]["S_infinite_volume"] = datum[
-                "S_infinite_volume"
-            ][0]
+            systematic = get_systematic(datum["systematics"], result)
+            result["fit_result"]["S_infinite_volume"] = np.array(
+                [value, error, systematic]
+            )
             continue
 
         for key in datum["fit_result"]:
@@ -73,9 +81,12 @@ def combine_samples(data):
 
             result["fit_result"][key] = datum["fit_result"][key]
             result["fit_result_samples"][key] = datum["fit_result_samples"][key]
-            result["fit_result_systematic_samples"][key] = datum[
-                "fit_result_systematic_samples"
-            ][key]
+            systematic_samples = datum["fit_result_systematic_samples"][key]
+            result["fit_result_systematic_samples"][key] = systematic_samples
+
+    for key, value in result["fit_result_systematic_samples"].items():
+        if np.isnan(value).all():
+            result["fit_result_systematic_samples"][key] = result["fit_result"][key][0]
 
     for key, samples in result["fit_result_systematic_samples"].items():
         # Randomise the direction of the variation,
@@ -87,14 +98,15 @@ def combine_samples(data):
             num_samples
         ) * samples / num_samples**0.5 + result["fit_result"][key][0]
 
-    if (
-        "S_infinite_volume" in result["fit_result"]
-        and "S_infinite_volume" not in result["fit_result_samples"]
-    ):
-        result["fit_result_samples"]["S_infinite_volume"] = generate_jackknife(
-            *result["fit_result"]["S_infinite_volume"],
-            result,
-            get_common_shape(result["fit_result_samples"]),
+    if "S_infinite_volume" in result["fit_result"]:
+        shape = get_common_shape(result["fit_result_samples"])
+        value, error, systematic = result["fit_result"]["S_infinite_volume"]
+        if "S_infinite_volume" not in result["fit_result_samples"]:
+            result["fit_result_samples"]["S_infinite_volume"] = generate_jackknife(
+                value, error, result, shape
+            )
+        result["fit_result_systematic_samples"]["S_infinite_volume"] = (
+            generate_jackknife(value, systematic, result, shape)
         )
 
     return result

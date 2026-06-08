@@ -17,6 +17,13 @@ def get_args():
     return parser.parse_args()
 
 
+def compute_systematics(datum, infinite_volume_S):
+    result = {key: datum[key] for key in ["Nx", "Ny", "Nz", "Nt"]}
+    finite_volume_S = datum["S_infinite_t_samples"]
+    result["systematic"] = abs(finite_volume_S[0] - infinite_volume_S[0])
+    return result
+
+
 def get_infinite_volume_S(data, result):
     assert len(data) > 0
     (mass,) = set(datum["mass"] for datum in data)
@@ -25,12 +32,16 @@ def get_infinite_volume_S(data, result):
     if len(data) > 1:
         # We already fitted these data; don't need to re-compute
         mass_index = list(result["fit_result"]["masses"]).index(mass)
+        infinite_volume_S = result["fit_result"]["S_infinite_volume"][mass_index]
         return {
-            "S_infinite_volume": result["fit_result"]["S_infinite_volume"][mass_index],
+            "S_infinite_volume": infinite_volume_S,
             "method": "fit_result",
             "mass": mass,
             "Nf": Nf,
             "source_metadata": result["source_metadata"],
+            "systematics": [
+                compute_systematics(datum, infinite_volume_S) for datum in data
+            ],
         }
 
     # We need to perform an extrapolation from our one point
@@ -52,6 +63,7 @@ def get_infinite_volume_S(data, result):
         "mass": mass,
         "Nf": Nf,
         "source_metadata": [{key: datum[key] for key in METADATA_KEYS}],
+        "systematics": [compute_systematics(datum, infinite_volume_S)],
     }
 
 

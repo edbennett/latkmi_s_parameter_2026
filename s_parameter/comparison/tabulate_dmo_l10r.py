@@ -5,6 +5,7 @@ from argparse import ArgumentParser, FileType
 from format_multiple_errors import format_multiple_errors
 import numpy as np
 
+from .compute_sum_rules import get_systematic
 from .tabulate_sum_rules import get_with_attribute
 from ..io import read_numpy
 
@@ -47,7 +48,11 @@ def get_row(data, spatial_size, temporal_size, mass):
             slug,
         )
 
-    time_moment_S = formatter(time_moment_datum["S_infinite_volume"])
+    infinite_volume_S = list(time_moment_datum["S_infinite_volume"])
+    infinite_volume_S.append(
+        get_systematic(time_moment_datum["systematics"], sum_rule_datum)
+    )
+    time_moment_S = formatter(infinite_volume_S)
     time_moment_l10_r = formatter(sum_rule_datum.get("l10-r"), 1000)
     dmo_S = formatter(sum_rule_datum.get("dmo"))
     dmo_l10_r = formatter(sum_rule_datum.get("dmo-l10-r"), 1000)
