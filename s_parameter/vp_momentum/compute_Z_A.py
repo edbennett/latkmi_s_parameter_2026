@@ -11,7 +11,7 @@ import json
 import numpy as np
 
 from ..io import dump_numpy
-from ..stats import jackknife_mean_variance, sample_jackknife_ratio, bin_data
+from ..stats import jackknife_mean_error, sample_jackknife_ratio, bin_data
 
 
 def get_args():
@@ -61,7 +61,7 @@ def get_Z_A(data, tmin, tmax, bin_size):
     # Include lower and upper bound, and allow negative indices
     Nt = Z_A_eff_samples.shape[-1]
     t_upper_bound = tmax % Nt + 1
-    Z_A_eff = jackknife_mean_variance(Z_A_eff_samples)
+    Z_A_eff = jackknife_mean_error(Z_A_eff_samples)
     Z_A_samples = np.average(
         Z_A_eff_samples[:, tmin:t_upper_bound],
         axis=-1,
@@ -70,7 +70,7 @@ def get_Z_A(data, tmin, tmax, bin_size):
     return {
         "Z_A_samples": Z_A_samples,
         "Z_A_eff": Z_A_eff,
-        "Z_A": jackknife_mean_variance(Z_A_samples),
+        "Z_A": jackknife_mean_error(Z_A_samples),
     }
 
 

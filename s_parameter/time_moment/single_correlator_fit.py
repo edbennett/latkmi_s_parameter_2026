@@ -9,7 +9,7 @@ from scipy.optimize import curve_fit
 
 from ..io import read_numpy, dump_numpy
 from ..stats import (
-    jackknife_mean_variance,
+    jackknife_mean_error,
     jackknife_statistical_intermediary,
     jackknife_systematic_intermediary,
     sample_systematics,
@@ -88,9 +88,9 @@ def fit_single(samples, min_timeslice, max_timeslice, starting_guess=None):
         residuals.append((info["fvec"] ** 2).sum())
 
     return {
-        "fit_result": jackknife_mean_variance(fit_samples),
+        "fit_result": jackknife_mean_error(fit_samples),
         "fit_result_samples": fit_samples,
-        "chisquare": jackknife_mean_variance(residuals),
+        "chisquare": jackknife_mean_error(residuals),
         "dof": max_timeslice - min_timeslice + 1 - 4,
         "min_timeslice": min_timeslice,
         "max_timeslice": max_timeslice,
@@ -112,7 +112,7 @@ def fit(full_data, min_timeslice, max_timeslice, channel):
 
     all_samples = fit_systematic(data, min_timeslice, max_timeslice)
     statistical_samples = jackknife_statistical_intermediary(all_samples, "flat")
-    values, errors = jackknife_mean_variance(statistical_samples)
+    values, errors = jackknife_mean_error(statistical_samples)
     systematic_samples = jackknife_systematic_intermediary(all_samples)
     systematic_errors = systematic_samples.mean(axis=0)
 

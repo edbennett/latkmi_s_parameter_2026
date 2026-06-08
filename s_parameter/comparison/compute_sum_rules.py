@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ..io import read_numpy, dump_numpy
-from ..stats import jackknife_mean_variance, generate_jackknife
+from ..stats import jackknife_mean_error, generate_jackknife
 
 
 METADATA_KEYS = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
@@ -262,14 +262,14 @@ def compute_sum_rules(data, prefixes_to_skip=[]):
         if any(name.startswith(prefix) for prefix in prefixes_to_skip):
             continue
         try:
-            central, statistical = jackknife_mean_variance(
+            central, statistical = jackknife_mean_error(
                 func({**data, **data["fit_result_samples"]})
             )
             systematic_samples = func({**data, **data["fit_result_systematic_samples"]})
             if isinstance(systematic_samples, float):
                 systematic = np.nan
             else:
-                _, systematic = jackknife_mean_variance(systematic_samples)
+                _, systematic = jackknife_mean_error(systematic_samples)
             result[name] = [central, statistical, systematic]
         except KeyError as key:
             message = f"Key {key} not found in data. Skipping computation of {name}."

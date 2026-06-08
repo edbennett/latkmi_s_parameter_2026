@@ -6,7 +6,7 @@ import numpy as np
 from scipy.special import gamma
 
 from ..io import read_numpy, dump_numpy
-from ..stats import jackknife_mean_variance
+from ..stats import jackknife_mean_error
 
 
 def get_args():
@@ -60,12 +60,12 @@ def get_S_parameter(data):
         # Contribution to the total S parameter from each time slice
         S_parameter_contrib = compute_S_parameter_contribution(v_minus_a)
         result["S_parameter_contrib_samples"] = S_parameter_contrib
-        result["S_parameter_contrib"] = jackknife_mean_variance(S_parameter_contrib)
+        result["S_parameter_contrib"] = jackknife_mean_error(S_parameter_contrib)
 
         # Effective S parameter; plateaus to S at large t
         S_parameter_eff = np.cumsum(S_parameter_contrib, axis=1)
         result["S_parameter_eff_samples"] = S_parameter_eff
-        result["S_parameter_eff"] = jackknife_mean_variance(S_parameter_eff)
+        result["S_parameter_eff"] = jackknife_mean_error(S_parameter_eff)
 
         results[current] = result
 

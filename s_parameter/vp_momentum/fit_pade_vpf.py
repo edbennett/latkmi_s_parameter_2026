@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit
 
 from ..io import dump_numpy, convert_types
 from .pade import pade, get_momentum_filter
-from ..stats import jackknife_mean_variance
+from ..stats import jackknife_mean_error
 
 
 def get_args():
@@ -34,7 +34,7 @@ def max_q(length):
 def get_s_parameter(param_samples):
     b0, b1, c1, _ = param_samples.T
     s_parameter_samples = (b1 - b0 * c1) * 2 * np.pi
-    return jackknife_mean_variance(s_parameter_samples)
+    return jackknife_mean_error(s_parameter_samples)
 
 
 def fit_single_pade(momentum_squared, vpf, vpf_uncertainty):
@@ -45,7 +45,7 @@ def fit_single_pade(momentum_squared, vpf, vpf_uncertainty):
 
 
 def fit_samples_pade(momentum_squared, vpf_samples):
-    _, vpf_uncertainty = jackknife_mean_variance(vpf_samples)
+    _, vpf_uncertainty = jackknife_mean_error(vpf_samples)
     result_samples, chisquare_samples = map(
         np.array,
         zip(
@@ -55,8 +55,8 @@ def fit_samples_pade(momentum_squared, vpf_samples):
             ]
         ),
     )
-    fit_values, fit_errors = jackknife_mean_variance(result_samples)
-    chisquare = jackknife_mean_variance(chisquare_samples)
+    fit_values, fit_errors = jackknife_mean_error(result_samples)
+    chisquare = jackknife_mean_error(chisquare_samples)
     b0, b1, c1, c2 = zip(fit_values, fit_errors)
 
     return {

@@ -11,7 +11,7 @@ import json
 import numpy as np
 
 from ..io import dump_numpy, convert_types
-from ..stats import jackknife_mean_variance, bin_data, sample_jackknife
+from ..stats import jackknife_mean_error, bin_data, sample_jackknife
 
 
 def get_args():
@@ -102,13 +102,13 @@ def process(raw_v_a, Z_A):
                 (correlator_samples, ""),
             ]:
                 result[f"{channel}{label}_samples"] = samples
-                result[f"{channel}{label}"] = jackknife_mean_variance(samples)
+                result[f"{channel}{label}"] = jackknife_mean_error(samples)
 
         v_minus_a_samples = (
             result["V_renormalised_samples"] - result["A_renormalised_samples"]
         )
         result["V-A_renormalised_samples"] = v_minus_a_samples
-        result["V-A_renormalised"] = jackknife_mean_variance(v_minus_a_samples)
+        result["V-A_renormalised"] = jackknife_mean_error(v_minus_a_samples)
 
         results[current] = result
 

@@ -9,7 +9,7 @@ from scipy.optimize import curve_fit
 from .sparam_tm import compute_S_parameter_contribution
 from ..io import read_numpy, dump_numpy
 from ..stats import (
-    jackknife_mean_variance,
+    jackknife_mean_error,
     jackknife_statistical_intermediary,
     jackknife_systematic_intermediary,
     sample_systematics,
@@ -142,7 +142,7 @@ def extrapolate_S_finite_t(fit_samples, m_rho, m_a_1, t_0, t_max, S_t_0):
     ).sum(axis=1)
     return {
         "times": times,
-        "S_effective": jackknife_mean_variance(S_eff_samples),
+        "S_effective": jackknife_mean_error(S_eff_samples),
     }
 
 
@@ -160,8 +160,8 @@ def interpolate_correlator_and_S(fit_samples, m_rho, m_a_1, t_0, t_1, max_time, 
     ).T
     return {
         "times": times[:, 0],
-        "correlator": jackknife_mean_variance(correlator),
-        "S_effective": jackknife_mean_variance(S_eff_samples),
+        "correlator": jackknife_mean_error(correlator),
+        "S_effective": jackknife_mean_error(S_eff_samples),
     }
 
 
@@ -170,7 +170,7 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
 
     assert data.shape[:-1] == m_rho.shape
     assert data.shape[:-1] == m_a_1.shape
-    data_values, data_uncertainty = jackknife_mean_variance(data)
+    data_values, data_uncertainty = jackknife_mean_error(data)
 
     fit_samples = []
     chisquares = []
@@ -207,11 +207,11 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     fit_samples_array = np.array(fit_samples)
 
     result = {
-        "fit_result": jackknife_mean_variance(fit_samples),
+        "fit_result": jackknife_mean_error(fit_samples),
         "fit_result_samples": result_samples,
-        "chisquare": jackknife_mean_variance(chisquares),
+        "chisquare": jackknife_mean_error(chisquares),
         "dof": max_timeslice - min_timeslice + 1 - len(result),
-        "S_infinite_t": jackknife_mean_variance(result_samples["S_infinite_t"]),
+        "S_infinite_t": jackknife_mean_error(result_samples["S_infinite_t"]),
         "bare_result_samples": fit_samples_array,
         "min_timeslice": min_timeslice,
         "max_timeslice": max_timeslice,
@@ -220,10 +220,10 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     for idx, name in enumerate(["A_plus", "A_minus", "V_plus", "V_minus"]):
         samples = fit_samples_array[..., idx]
         result_samples[f"C_{name}"] = samples
-        result[f"C_{name}"] = jackknife_mean_variance(samples)
-        result[f"S_{name}"] = jackknife_mean_variance(result_samples[f"S_{name}"])
+        result[f"C_{name}"] = jackknife_mean_error(samples)
+        result[f"S_{name}"] = jackknife_mean_error(result_samples[f"S_{name}"])
         result_samples[f"model_S_{name}"] = model_result_samples[f"S_{name}"]
-        result[f"model_S_{name}"] = jackknife_mean_variance(
+        result[f"model_S_{name}"] = jackknife_mean_error(
             model_result_samples[f"S_{name}"]
         )
 
@@ -232,8 +232,8 @@ def fit_single(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
 
 def get_chisquare(full_data, fit_samples, m_rho, m_a_1, min_timeslice, max_timeslice):
     data = full_data["Conserved"]["V-A_renormalised_samples"]
-    data_values, data_uncertainty = jackknife_mean_variance(data)
-    fit_values, _ = jackknife_mean_variance(fit_samples)
+    data_values, data_uncertainty = jackknife_mean_error(data)
+    fit_values, _ = jackknife_mean_error(fit_samples)
     times = np.arange(min_timeslice, max_timeslice)
 
     func_at_fit_result = fit_form(
@@ -285,7 +285,7 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
         statistical_samples = jackknife_statistical_intermediary(obs_samples, "flat")
         result["fit_result_samples"][key] = statistical_samples
 
-        value, error = jackknife_mean_variance(statistical_samples)
+        value, error = jackknife_mean_error(statistical_samples)
 
         systematic_samples = jackknife_systematic_intermediary(obs_samples)
         result["fit_result_systematic_samples"][key] = systematic_samples

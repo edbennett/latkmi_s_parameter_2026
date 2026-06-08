@@ -8,7 +8,7 @@ from math import prod
 import numpy as np
 
 
-def jackknife_mean_variance(samples, systematic_method=None):
+def jackknife_mean_error(samples, systematic_method=None):
     """
     Given a set of jackknife samples
     (sampled along axis 0, with other axes free),

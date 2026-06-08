@@ -7,7 +7,7 @@ from multiprocessing import Pool
 import pandas as pd
 
 from ..io import read_numpy
-from ..stats import generate_jackknife, jackknife_mean_variance, add_quadrature
+from ..stats import generate_jackknife, jackknife_mean_error, add_quadrature
 from ..time_moment.finite_volume import delta_fv_S
 
 
@@ -40,7 +40,7 @@ def extrapolate_single(datum, fit_result):
     datum["bin_size"] = 1
 
     pi_mass = _generate_jackknife(datum, "pi_mass")
-    finite_volume_factor = jackknife_mean_variance(delta_fv_S(datum["Nx"], pi_mass))
+    finite_volume_factor = jackknife_mean_error(delta_fv_S(datum["Nx"], pi_mass))
 
     value_finite_volume_S = datum["value_S_lattice"]
     const_coefficient = fit_result["fit_result"]["C"]

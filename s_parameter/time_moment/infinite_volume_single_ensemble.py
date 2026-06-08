@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, FileType
 
 from ..io import read_numpy, dump_numpy
-from ..stats import generate_jackknife, jackknife_mean_variance
+from ..stats import generate_jackknife, jackknife_mean_error
 
 
 METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
@@ -55,7 +55,7 @@ def get_infinite_volume_S(data, result):
     infinite_volume_S_samples = (
         finite_volume_S - const_coefficient * finite_volume_factor
     )
-    infinite_volume_S = jackknife_mean_variance(infinite_volume_S_samples)
+    infinite_volume_S = jackknife_mean_error(infinite_volume_S_samples)
     return {
         "S_infinite_volume": infinite_volume_S,
         "S_infinite_volume_samples": infinite_volume_S_samples,

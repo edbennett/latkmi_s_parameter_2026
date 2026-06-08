@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from ..io import read_numpy
 from ..plot import iterate_attribute, save_or_show, Props
-from ..stats import jackknife_mean_variance, add_quadrature
+from ..stats import jackknife_mean_error, add_quadrature
 
 
 def get_args():
@@ -42,7 +42,7 @@ def add_data(ax, data, fit_result, props):
             "S_infinite_volume"
         ][mass_index]
         L_M_pi = [
-            datum["Nx"] * jackknife_mean_variance(datum["pi_mass_samples"])[0]
+            datum["Nx"] * jackknife_mean_error(datum["pi_mass_samples"])[0]
             for datum in subset
         ]
         difference_value = [

@@ -9,7 +9,7 @@ import pandas as pd
 from scipy.integrate import quad_vec, nsum
 
 from ..io import read_numpy, dump_numpy
-from ..stats import generate_jackknife, jackknife_mean_variance
+from ..stats import generate_jackknife, jackknife_mean_error
 
 
 METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
@@ -210,7 +210,7 @@ def main():
     dump_numpy(
         {
             "delta_fv_S_samples": result,
-            "delta_fv_S": jackknife_mean_variance(result),
+            "delta_fv_S": jackknife_mean_error(result),
             "S_infinite_t_systematic_samples": s_parameter_vp[
                 "S_infinite_t_systematic_samples"
             ],

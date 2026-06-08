@@ -10,7 +10,7 @@ from argparse import ArgumentParser, FileType
 import json
 
 from ..io import dump_numpy, convert_types
-from ..stats import jackknife_mean_variance
+from ..stats import jackknife_mean_error
 
 
 def get_args():
@@ -43,7 +43,7 @@ def renormalise(vpf, Z_A):
         for current, samples in vpf["vpf_samples"].items()
     }
     renormalised_vpf = {
-        current: jackknife_mean_variance(samples)
+        current: jackknife_mean_error(samples)
         for current, samples in renormalised_vpf_samples.items()
     }
     return {

@@ -14,7 +14,7 @@ import json
 import numpy as np
 
 from ..io import dump_numpy, convert_types
-from ..stats import jackknife_mean_variance, sample_jackknife, bin_data
+from ..stats import jackknife_mean_error, sample_jackknife, bin_data
 
 
 def get_args():
@@ -179,7 +179,7 @@ def get_vpf(data, bin_size=1):
     vpf_combined = map_dict(combine_sources, vpf_raw)
     vpf_bins = map_dict(partial(bin_data, bin_size=bin_size), vpf_combined)
     vpf_samples = map_dict(sample_jackknife, vpf_bins)
-    vpf = map_dict(jackknife_mean_variance, vpf_samples)
+    vpf = map_dict(jackknife_mean_error, vpf_samples)
 
     return {
         "vpf": vpf,
