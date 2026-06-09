@@ -23,10 +23,14 @@ def jackknife_mean_error(samples, systematic_method=None):
     if systematic_method:
         if systematic_method != "max_deviation":
             raise NotImplementedError(f"{systematic_method} not currently implemented.")
+        insufficient_samples = len(samples) <= 2
         samples = samples.mean(axis=0)
 
     mean = np.mean(samples, axis=0)
     variance = (len(samples) - 1) / len(samples) * ((samples - mean) ** 2).sum(axis=0)
+    if systematic_method and insufficient_samples:
+        variance = np.nan
+
     return mean, variance**0.5
 
 
@@ -126,7 +130,6 @@ def jackknife_systematic_intermediary(samples, method="max_deviation"):
     return np.array(
         [
             np.max(np.abs(sample - np.mean(sample, axis=0)), axis=0)
-            / len(sample) ** 0.5
             for sample in samples.swapaxes(0, 1)
         ]
     )
