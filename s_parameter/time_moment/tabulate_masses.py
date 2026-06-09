@@ -30,7 +30,10 @@ def tabulate(data):
         structured_datum["$L$"] = datum["Nx"]
         structured_datum["$T$"] = datum["Nt"]
         structured_datum["$am_f$"] = str(datum["mass"])
-        for channel, channel_label in [("rho", r"\rho"), ("a_1", "a_1")]:
+        for channel, channel_label, decimal_places in [
+            ("rho", r"\rho", 4),
+            ("a_1", "a_1", 3),
+        ]:
             for observable, observable_label in [("mass", "M"), ("decay_const", "F")]:
                 target_key = f"{channel}_{observable}"
                 if target_key in datum["fit_result"]:
@@ -39,8 +42,8 @@ def tabulate(data):
                             *datum["fit_result"][f"{channel}_{observable}"],
                             abbreviate=True,
                             latex=True,
-                            length_control="largest",
-                            significant_figures=2,
+                            length_control="decimal_places",
+                            significant_figures=decimal_places,
                         )
                     )
 

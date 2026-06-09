@@ -41,9 +41,15 @@ def get_row(data, spatial_size, temporal_size, mass):
     )
 
     vacuum_polarisation_S = formatter(
-        vacuum_polarisation_datum["pade_fit_result"]["Conserved"]["S"]
+        vacuum_polarisation_datum["pade_fit_result"]["Conserved"]["S"],
+        length_control="decimal_places",
+        significant_figures=3,
     )
-    time_moment_S = formatter(time_moment_datum["S_infinite_t"])
+    time_moment_S = formatter(
+        time_moment_datum["S_infinite_t"],
+        length_control="decimal_places",
+        significant_figures=3,
+    )
 
     row_data = [spatial_size, temporal_size, mass, vacuum_polarisation_S, time_moment_S]
     return " & ".join(map(str, row_data)) + r" \\"
