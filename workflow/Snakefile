@@ -15,6 +15,7 @@ def get_metadata(column, from_df=metadata):
 include: "rules/meta.smk"
 include: "rules/za.smk"
 include: "rules/vp-momentum.smk"
+include: "rules/v-a-correlator.smk"
 include: "rules/time-moment.smk"
 include: "rules/comparison.smk"
 
