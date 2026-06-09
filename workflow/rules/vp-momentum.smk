@@ -62,7 +62,7 @@ rule extract_momentum_currents:
         data=f"data/{subdir_format}/correlator.log.zst",
         script="s_parameter/vp_momentum/extract_momentum_correlators.py",
     output:
-        data=f"processed_data/{subdir_format}/momentum_currents.json.gz",
+        data=f"processed_data/{subdir_format}/momentum_currents.json.zstd",
     conda:
         "../envs/python.yml"
     shell:
