@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from .plot_s_parameter import main
+from .plot_S_parameter import main
 
 
 def get_chisquare(datum):
