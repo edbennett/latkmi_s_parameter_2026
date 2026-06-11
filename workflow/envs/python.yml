@@ -66,6 +66,7 @@ dependencies:
       - traitlets==5.15.0
       - typing-extensions==4.15.0
       - typing-inspection==0.4.2
+      - ujson==5.12.1
       - uncertainties==3.2.3
       - wcwidth==0.7.0
 prefix: /opt/homebrew/Caskroom/miniconda/base/envs/sparameter-test

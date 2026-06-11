@@ -4,7 +4,7 @@
 Tools for getting data in and out of files.
 """
 
-import json
+import ujson as json
 
 import numpy as np
 
