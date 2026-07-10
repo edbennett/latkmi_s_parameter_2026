@@ -1,0 +1,74 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  The Peskin-Takeuchi S parameter and vector meson decay
+  constants in Nf = 8 QCD—Analysis workflow
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Yasumichi
+    family-names: Aoki
+    email: yasumichi.aoki@riken.jp
+    affiliation: RIKEN
+    orcid: 'https://orcid.org/0000-0003-4096-8836'
+  - given-names: Tatsumi
+    family-names: Aoyama
+    affiliation: University of Tokyo
+  - given-names: Ed
+    family-names: Bennett
+    email: e.j.bennett@swansea.ac.uk
+    affiliation: Swansea University
+    orcid: 'https://orcid.org/0000-0002-1678-6701'
+  - given-names: Masafumi
+    family-names: Kurachi
+    email: kurachi@keio.jp
+    orcid: 'https://orcid.org/0000-0002-6920-9553'
+    affiliation: Keio University
+  - given-names: Toshihide
+    family-names: Maskawa
+    affiliation: Nagoya University
+  - given-names: Kohtaroh
+    family-names: Miura
+    email: physmiura@gmail.com
+    affiliation: KEK
+    orcid: 'https://orcid.org/0000-0002-6975-0446'
+  - given-names: Kei-ichi
+    family-names: Nagai
+    affiliation: Nagoya University
+  - given-names: Hiroshi
+    family-names: Ohki
+    email: hohki@cc.nara-wu.ac.jp
+    affiliation: Nara Women's University
+  - given-names: Enrico
+    family-names: Rinaldi
+    email: erinaldi.work@gmail.com
+    affiliation: Quantinuum
+    orcid: 'https://orcid.org/0000-0003-4134-809X'
+  - given-names: Akihiro
+    family-names: Shibata
+    email: akihiro.shibata@kek.jp
+    affiliation: KEK
+    orcid: 'https://orcid.org/0000-0002-5606-5386'
+  - given-names: Koichi
+    family-names: Yamawaki
+    email: yamawaki@kmi.nagoya-u.ac.jp
+    affiliation: Nagoya University
+    orcid: 'https://orcid.org/0000-0002-3056-438X'
+  - given-names: Takeshi
+    family-names: Yamazaki
+    email: yamazaki@het.ph.tsukuba.ac.jp
+    affiliation: Tsukuba University
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21297277
+    description: Zenodo DOI
+repository-code: 'https://github.com/edbennett/latkmi_s_parameter_2026'
+abstract: >-
+  This repository contains the analysis code used
+  to prepare the plots and tables included in
+  the paper "The Peskin-Takeuchi S parameter
+  and vector meson decay constants in Nf = 8 QCD".
