@@ -50,16 +50,13 @@ def get_pi_mass(spectrum_data, datum):
 
 
 def get_mpi_over_mrho(chiral_data, spectrum_data, datum):
-    value_rho_mass_chiral, error_rho_mass_chiral, _ = get_rho_mass(chiral_data)
+    value_rho_mass_chiral, *errors_rho_mass_chiral = get_rho_mass(chiral_data)
+    total_error_rho_mass_chiral = add_quadrature(*errors_rho_mass_chiral)
     value_pi_mass, error_pi_mass = get_pi_mass(spectrum_data, datum)
     value_ratio = value_pi_mass / value_rho_mass_chiral
-    error_ratio = (
-        value_ratio
-        * (
-            (error_pi_mass / value_pi_mass) ** 2
-            + (error_rho_mass_chiral / value_rho_mass_chiral) ** 2
-        )
-        ** 0.5
+    error_ratio = value_ratio * add_quadrature(
+        (value_pi_mass, error_pi_mass),
+        (value_rho_mass_chiral, total_error_rho_mass_chiral),
     )
     return value_ratio, error_ratio
 
@@ -67,12 +64,16 @@ def get_mpi_over_mrho(chiral_data, spectrum_data, datum):
 def add_latkmi_data(ax, infinite_volume_data, chiral_data, spectrum_data):
     data_to_plot = []
     for infinite_volume_datum in infinite_volume_data:
-        data_to_plot.append(
-            (
-                *get_mpi_over_mrho(chiral_data, spectrum_data, infinite_volume_datum),
-                *infinite_volume_datum["S_infinite_volume"],
-            )
+        datum_value_S, datum_error_S = infinite_volume_datum["S_infinite_volume"]
+        datum_systematic_S = sorted(
+            infinite_volume_datum["systematics"], key=lambda d: d["Nx"]
+        )[-1]["systematic"]
+        datum_total_error_S = add_quadrature(datum_error_S, datum_systematic_S)
+        datum_mpi_over_mrho = get_mpi_over_mrho(
+            chiral_data, spectrum_data, infinite_volume_datum
         )
+        data_to_plot.append((*datum_mpi_over_mrho, datum_value_S, datum_total_error_S))
+
     value_mpi_over_mrho, error_mpi_over_mrho, value_S, error_S = zip(*data_to_plot)
     ax.errorbar(
         value_mpi_over_mrho,
