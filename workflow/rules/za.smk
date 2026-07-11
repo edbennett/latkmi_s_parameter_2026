@@ -93,7 +93,7 @@ rule Z_A_fit:
         ],
         script="s_parameter/vp_momentum/fit_Z_A.py",
     output:
-        data="processed_data/Z_A.json",
+        data="data_assets/Z_A.json",
     conda:
         "../envs/python.yml"
     shell:
