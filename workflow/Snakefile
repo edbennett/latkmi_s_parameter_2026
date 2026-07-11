@@ -129,3 +129,35 @@ rule copy_lightest_definition_infinite_volume:
         "assets/definitions/lightest_{filename}.tex",
     shell:
         "cp {input} {output}"
+
+
+rule ensemble_csv:
+    params:
+        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
+    input:
+        previous_data="previous_data/spectrum.csv",
+        data=[
+            rule.output.data.format(**row, kind="renormalised")
+            for rule in [rules.S_parameter_tm_fit, rules.pade_fit_systematics, rules.compute_sum_rules, rules.Z_A]
+            for row in metadata.to_dict(orient="records")
+        ],
+        spectrum_data=[
+            rules.meson_v_a.output.data.format(**row, channel=channel)
+            for row in metadata.to_dict(orient="records")
+            for channel in ["V", "A"]
+        ],
+        time_moment_infinite_volume=[
+            rules.infinite_volume_extrapolate.output.data.format(**ensemble)
+            for ensemble in metadata.query(
+                "plot_large_volume_light_ensembles"
+            ).to_dict(orient="records")
+        ],
+        script="s_parameter/data/export_ensemble_data.py",
+    output:
+        data="data_assets/ensemble_data.csv",
+    conda:
+        "envs/python.yml"
+    shell:
+        "python -m {params.module} {input.previous_data}"
+        " {input.data} {input.spectrum_data} {input.time_moment_infinite_volume}"
+        " --output_file {output.data}"

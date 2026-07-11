@@ -2,6 +2,7 @@
 .snakemake/
 /metadata/
 /assets/
+/data_assets/
 tmp
 /processed_data/
 __pycache__
