@@ -80,6 +80,7 @@ definitions = [
     "spectrum_observations",
     "lightest_infinite_volume_S_tm",
 ]
+data_assets = ["ensemble_data.csv", "Z_A.json"]
 
 rule all:
     input:
@@ -90,6 +91,7 @@ rule all:
         ),
         tables=expand("assets/tables/{table_name}.tex", table_name=tables),
         definitions="assets/definitions/all_definitions.tex",
+        data=expand("data_assets/{filename}", filename=data_assets),
     default_target: True
 
 
