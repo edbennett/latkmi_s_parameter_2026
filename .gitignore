@@ -1,8 +1,8 @@
-data
-.snakemake
-metadata
-assets/
+/data/
+.snakemake/
+/metadata/
+/assets/
 tmp
-processed_data
+/processed_data/
 __pycache__
-previous_data/
+/previous_data/
