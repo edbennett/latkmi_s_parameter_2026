@@ -236,7 +236,7 @@ rule plot_S_parameter:
             )
             for metadatum in metadata.to_dict(orient="records")
         },
-        script="s_parameter/vp_momentum/plot_S_parameter.py",
+        script="s_parameter/vp_momentum/plot_S_parameter_summary.py",
         plot_styles=config["plot_styles"],
     output:
         plot="assets/plots/S_parameter_mf.pdf",

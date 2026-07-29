@@ -121,10 +121,13 @@ def plot(data, datum_getter, ylabel, ylim, yscale):
     return fig
 
 
-def main(datum_getter, ylabel, ylim, yscale="linear"):
+def main(datum_getter, ylabel, ylim, yscale="linear", flatten=False):
     args = get_args()
     plt.style.use(args.plot_styles)
     data = [read_numpy(filename) for filename in args.input_files]
+    if flatten:
+        for datum in data:
+            datum["upper_bound"] = "common"
 
     fig = plot(data, datum_getter, ylabel, ylim, yscale)
     save_or_show(fig, args.output_file)
