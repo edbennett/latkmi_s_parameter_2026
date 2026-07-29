@@ -97,13 +97,13 @@ rule all:
 
 rule all_definitions:
     params:
-        content="\\\n".join([f"\\\\input \\{{{filename}\\}}" for filename in definitions])
+        content="|".join([f"\\input {{assets/definitions/{filename}}}" for filename in definitions])
     input:
         expand("assets/definitions/{filename}.tex", filename=definitions),
     output:
         "assets/definitions/all_definitions.tex",
     shell:
-        "echo {params.content} > {output}"
+        r"echo '{params.content}' | tr '|' '\n' > {output}"
 
 
 rule copy_ensemble_plot:
