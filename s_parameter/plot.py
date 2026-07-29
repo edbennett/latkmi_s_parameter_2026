@@ -157,20 +157,22 @@ def add_qcd_value(ax, numerator, denominator=None):
         "rho_mass": 770.26,
         # https://pdglive.lbl.gov/DataBlock.action?node=M010M
         "a_1_mass": 1230,
-        # TODO: Ask Miura-san where the original numbers leading to these came from
-        "rho_decay_const": 217.4,
-        "a_1_decay_const": 171.2,
-        "pi_decay_const": 130.2,
+        # https://pdg.lbl.gov/2012/reviews/rpp2012-rev-pseudoscalar-meson-decay-cons.pdf
+        "pi_decay_const": 130.41,
     }
 
-    if numerator in qcd_values:
-        value = qcd_values[numerator]
-        if denominator is not None:
-            value /= qcd_values[denominator]
-    elif numerator in compute_sum_rules.rules:
-        value = compute_sum_rules.rules[numerator](qcd_values)
-    else:
-        raise NotImplementedError
+    try:
+        if numerator in qcd_values:
+            value = qcd_values[numerator]
+            if denominator is not None:
+                value /= qcd_values[denominator]
+        elif numerator in compute_sum_rules.rules:
+            value = compute_sum_rules.rules[numerator](qcd_values)
+        else:
+            raise KeyError
+    except KeyError as ex:
+        print(f"Missing QCD datum for {ex}; no QCD point will appear on this plot.")
+        return
 
     ax.plot(
         [0],
