@@ -139,6 +139,7 @@ def add_generated_samples(new_datum, old_data):
         ("fpi", "pi_decay_const"),
         ("mpi", "pi_mass"),
         ("t0c", "t0"),
+        ("mrho", "rho_pv_mass"),
     ]:
         value, error = get_old_data(new_datum, old_data, old_key)
         if value:
@@ -230,7 +231,7 @@ def l10_r(samples, S):
     """
     Nf = 8  # Number of flavours
     m_pi = samples["pi_mass"]
-    m_rho = samples["rho_mass"]
+    m_rho = samples["rho_pv_mass"]
     return -S / (16 * np.pi) - 1 / (192 * np.pi**2) * (Nf / 2) * (
         np.log(m_pi**2 / m_rho**2) + 1
     )
