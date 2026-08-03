@@ -225,13 +225,17 @@ def dmo(samples):
     return 2 * np.pi * (f_rho**2 / m_rho**2 - f_a_1**2 / m_a_1**2)
 
 
-def l10_r(samples, S):
+def l10_r(samples, S, rho_type):
     """
     The low energy constant $L_{10}^r$; see Eq. (55) of the paper.
     """
+    rho_keys = {
+        "pv": "rho_pv_mass",
+        "vt": "rho_mass",
+    }
     Nf = 8  # Number of flavours
     m_pi = samples["pi_mass"]
-    m_rho = samples["rho_pv_mass"]
+    m_rho = samples[rho_keys[rho_type]]
     return -S / (16 * np.pi) - 1 / (192 * np.pi**2) * (Nf / 2) * (
         np.log(m_pi**2 / m_rho**2) + 1
     )
@@ -252,8 +256,8 @@ rules = {
     "ksrf-i": ksrf_i,
     "ksrf-ii": ksrf_ii,
     "dmo": dmo,
-    "l10-r": lambda s: l10_r(s, s["S_infinite_volume"]),
-    "dmo-l10-r": lambda s: l10_r(s, dmo(s)),
+    "l10-r": lambda s: l10_r(s, s["S_infinite_volume"], "pv"),
+    "dmo-l10-r": lambda s: l10_r(s, dmo(s), "vt"),
 }
 
 
