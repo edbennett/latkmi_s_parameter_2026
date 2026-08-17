@@ -95,6 +95,13 @@ def get_args(old_data=False, select_plot=False):
     return parser.parse_args()
 
 
+def set_xlim(fig):
+    for ax in fig.axes:
+        xmin, xmax = ax.get_xlim()
+        if xmin > 0:
+            ax.set_xlim(0, xmax)
+
+
 def comparison_plot_main(callback, old_data=False, select_plot=False):
     args = get_args(old_data, select_plot)
     plt.style.use(args.plot_styles)
@@ -108,6 +115,8 @@ def comparison_plot_main(callback, old_data=False, select_plot=False):
         params["plot_type"] = args.plot_type
 
     fig = callback(new_data, **params)
+
+    set_xlim(fig)
     save_or_show(fig, args.output_file)
 
 
