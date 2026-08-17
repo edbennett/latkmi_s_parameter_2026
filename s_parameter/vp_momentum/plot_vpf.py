@@ -58,8 +58,8 @@ def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
             "OneLink": r"$Z_A^2 \times \textnormal{OneLink--OneLink}$",
         },
         False: {
-            "Conserved": "$Conserved--OneLink",
-            "OneLink": "$OneLink--OneLink",
+            "Conserved": "Conserved--OneLink",
+            "OneLink": "OneLink--OneLink",
         },
     }
     momentum_filter = get_momentum_filter(
@@ -92,6 +92,7 @@ def plot(data, renormalised=False, q_squared_upper_bound=None, fit_result=None):
         plot_fit_result(ax, fit_result)
 
     ax.set_ylim(None, 0)
+    ax.legend(loc="lower right")
 
     fig.suptitle(title)
 
