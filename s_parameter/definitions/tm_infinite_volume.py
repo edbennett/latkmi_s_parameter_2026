@@ -14,9 +14,13 @@ def get_args():
 
 
 def get_definitions(data):
+    assert len(data["systematics"] == 1)
+    systematic = data["systematics"][0]["systematic"]
     return define(
         f"S_Parameter_Infinite_Volume_Time_Moment_Nf{data['Nf']}_mf{data['mass']}",
-        tuple(data["S_infinite_volume"]),
+        tuple(list(data["S_infinite_volume"]) + [systematic]),
+        length_control="largest",
+        significant_figures=2,
     )
 
 

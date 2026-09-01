@@ -52,7 +52,7 @@ def sanitize(key):
     return key
 
 
-def reformat(value):
+def reformat(value, **flags):
     if isinstance(value, UFloat):
         return f"{value:.02uSL}"
     if (
@@ -62,7 +62,7 @@ def reformat(value):
             isinstance(subvalue, float) or len(subvalue) == 2 for subvalue in value[1:]
         )
     ):
-        return format_multiple_errors(*value, abbreviate=True, latex=True)
+        return format_multiple_errors(*value, abbreviate=True, latex=True, **flags)
     if isinstance(value, int):
         return str(value)
     if isinstance(value, float):
@@ -73,12 +73,14 @@ def reformat(value):
     raise ValueError(f"I don't know how to format a {type(value)}.")
 
 
-def define(name, value):
-    return f"\\newcommand \\{sanitize(name)} {{{reformat(value)}}}"
+def define(name, value, **flags):
+    return f"\\newcommand \\{sanitize(name)} {{{reformat(value, **flags)}}}"
 
 
-def define_many(*values):
-    return "\n".join(define(name, value) for name, value in dict(values).items())
+def define_many(*values, **flags):
+    return "\n".join(
+        define(name, value, **flags) for name, value in dict(values).items()
+    )
 
 
 def name_ensemble(datum):
