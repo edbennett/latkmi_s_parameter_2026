@@ -305,10 +305,14 @@ def fit(full_data, m_rho, m_a_1, min_timeslice, max_timeslice):
     fit_samples = jackknife_statistical_intermediary(
         np.array([sample["bare_result_samples"] for sample in all_samples]), "flat"
     )
-    result["chisquare"] = get_chisquare(
-        full_data, fit_samples, m_rho, m_a_1, min_timeslice, max_timeslice
-    )
-    result["dof"] = max_timeslice - min_timeslice + 1 - 4
+
+    def sample_length(sample):
+        # Do not subtract 1; max_timeslice is exclusive here
+        return sample["max_timeslice"] - sample["min_timeslice"]
+
+    full_range_sample = max(all_samples, key=sample_length)
+    result["chisquare"] = full_range_sample["chisquare"][0]
+    result["dof"] = sample_length(full_range_sample) - 4  # 4 fit parameters
     start_S_samples = full_data["Conserved"]["S_parameter_eff_samples"][
         :, min_timeslice - 1
     ]
