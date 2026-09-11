@@ -158,6 +158,23 @@ def plot_new_series(ax, data, key, colour, marker, label, offset=0):
         )
 
 
+def get_a_1_decay_const():
+    # Phys. Rev. D 60, 111502 (1999) Table I
+    # https://arxiv.org/pdf/nucl-th/9906038
+    value_pheno = 203.0
+
+    # Phys.Rev. D 91, 093001 (2015) Section IV
+    # https://arxiv.org/pdf/1502.01704
+    # Multiply by sqrt(2) due to differing normalisation convention
+    value_three_pi_saturation = 164.6 * 2**0.5
+
+    # We also consider the value from QCD sum rules, 0705.0692
+    # However, this is within the error bar one gets from the previous two values,
+    # so we do not include it in the following result
+
+    return (value_pheno + value_three_pi_saturation) / 2
+
+
 def add_qcd_value(ax, numerator, denominator=None):
     # S. Navas et al. (Particle Data Group),
     # Phys. Rev. D 110, 030001 (2024) and 2025 update.
@@ -168,7 +185,22 @@ def add_qcd_value(ax, numerator, denominator=None):
         "a_1_mass": 1230,
         # https://pdg.lbl.gov/2012/reviews/rpp2012-rev-pseudoscalar-meson-decay-cons.pdf
         "pi_decay_const": 130.41,
+        # Gamma_12 from https://pdglive.lbl.gov/Particle.action?init=0&node=M009&home=MXXX005
+        # Factor of 1e-3 to place in MeV for compatibility with other quantities
+        "gamma_ee": 7.04e-3,
+        # https://physics.nist.gov/cuu/pdf/wallet_2022.pdf
+        "1/alpha": 137.035_999_177,
     }
+
+    # Use theoretical form of rho0 -> e+e-
+    # to estimate decay constant from branching fraction
+    qcd_values["rho_decay_const"] = (
+        3
+        * qcd_values["rho_mass"]
+        * qcd_values["gamma_ee"]
+        / (2 * np.pi * (1 / qcd_values["1/alpha"]) ** 2)
+    ) ** 0.5
+    qcd_values["a_1_decay_const"] = get_a_1_decay_const()
 
     try:
         if numerator in qcd_values:
