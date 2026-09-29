@@ -59,7 +59,7 @@ snakemake previous_data/spectrum_2505.08658.csv previous_data/fit_results_2505.0
 The former command prepares the Conda environments,
 while the latter downloads data from our previous work that this analysis relies upon.
 
-The workflow takes around three hours to run
+The workflow takes around 26 minutes to run
 using six cores of an Apple M1 CPU.
 
 ## Output
