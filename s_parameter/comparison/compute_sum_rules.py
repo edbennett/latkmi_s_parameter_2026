@@ -242,8 +242,7 @@ def l10_r(samples, S, rho_type):
 
 
 rules = {
-    "frho-fpi": lambda s: s["rho_decay_const"]
-    / s["pi_decay_const"],  # TODO check normalisation
+    "frho-fpi": lambda s: s["rho_decay_const"] / s["pi_decay_const"],
     "frho-fa1": lambda s: s["rho_decay_const"] / s["a_1_decay_const"],
     "mpi-mrho": lambda s: s["pi_mass"] / s["rho_mass"],
     "ma1-mrho": lambda s: s["a_1_mass"] / s["rho_mass"],

@@ -50,7 +50,6 @@ def add_data(ax, data, fit_result, props):
         ]
         difference_error = [
             add_quadrature(infinite_volume_S_error, datum["S_infinite_t"][1])
-            # TODO systematic
             for datum in subset
         ]
         ax.errorbar(
