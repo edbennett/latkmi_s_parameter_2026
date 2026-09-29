@@ -83,6 +83,22 @@ extending the analysis in this way
 has not been as fully tested as the rest of the workflow,
 and is not guaranteed to be trivial for someone not already familiar with the code.
 
+## References
+
+This release contains data from the following sources:
+
+- Phys.Rev.Lett. 101 (2008) 242001 [[0806.4222](https://arxiv.org/abs/0806.4222)]
+  (`external_data/jlqcd_prl08_l10_r.csv`)
+- Phys.Rev.D 81 (2010) 014504 [[0909.4931](https://arxiv.org/abs/0909.4931)]
+  (`external_data/rbc_ukqcd_prd10_l10_r.csv`)
+- Phys.Rev.D 90 (2014) 11, 114502 [[1405.4752](https://arxiv.org/abs/1405.2752)]
+  (`external_data/lsd_prd14_spectra_sparameter_table_6.csv`, `lsd_prd14_spectra_sparameter_table_6.csv`)
+- Phys.Rev.D 99 (2019) 1, 014509 [[1807.08411](https://arxiv.org/abs/1807.08411)]
+  (`external_data/lsd_prd19_spectra_nf08_table_1_3_4.csv`)
+- [https://doi.org/10.5281/zenodo.17037868](https://doi.org/10.5281/zenodo.17037868),
+  updated with additional data from previous work as noted in the file
+  (`previous_data/spectrum_2505.08658_updated.csv`)
+
 [datarelease]: https://doi.org/10.5281/zenodo.21693826
 [miniforge]: https://github.com/conda-forge/miniforge
 [paper]: https://doi.org/10.48550/arXiv.2609.35371

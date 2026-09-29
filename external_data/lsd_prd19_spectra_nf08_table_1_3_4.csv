@@ -1,3 +1,4 @@
+# Data from Phys.Rev.D 99 (2019) 1, 014509, tables I, III, and IV
 Nx,Ny,Nz,Nt,mass,value_s8t0,erorr_s8t0,value_mpi_s8t0,error_mpi_s8t0,value_msigma_s8t0,error_msigma_s8t0,value_mrho_s8t0,error_mrho_s8t0,value_ma1_s8t0,error_ma1_s8t0,value_mN_s8t0,error_mN_s8t0,value_fpi_s8t0,error_fpi_s8t0,value_frho_s8t0,error_frho_s8t0,value_fa1_s8t0,error_fa1_s8t0,value_frho_over_fpi,error_frho_over_fpi,value_g_rho_pi_pi,error_g_rho_pi_pi
 64,64,64,128,0.00125,4.7345,0.0014,0.3885,0.003,0.42,0.15,0.809,0.031,1.07,0.21,1.08,0.14,0.10052,0.00066,0.143,0.014,0.111,0.043,1.43,0.14,5.69,0.22
 48,48,48,96,0.00222,4.5742,0.0021,0.5036,0.0055,0.599,0.091,1.005,0.017,1.364,0.013,1.43,0.11,0.12524,0.00078,0.17,0.025,0.178,0.05,1.36,0.2,5.67,0.1

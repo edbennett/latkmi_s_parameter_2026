@@ -105,7 +105,7 @@ def main():
 
     latkmi_data = [read_numpy(input_file) for input_file in args.input_files]
     spectrum_data = pd.read_csv(args.spectrum_data)
-    lsd_data = pd.read_csv(args.lsd_data) if args.lsd_data else None
+    lsd_data = pd.read_csv(args.lsd_data, comment="#") if args.lsd_data else None
 
     fig = plot(latkmi_data, spectrum_data, args.group_by, lsd_data)
     save_or_show(fig, args.output_file)

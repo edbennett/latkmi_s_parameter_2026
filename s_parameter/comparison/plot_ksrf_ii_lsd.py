@@ -76,7 +76,7 @@ def main():
     plt.style.use(args.plot_styles)
 
     latkmi_data = [read_numpy(input_file) for input_file in args.input_files]
-    lsd_data = pd.read_csv(args.lsd_data)
+    lsd_data = pd.read_csv(args.lsd_data, comment="#")
 
     fig = plot(latkmi_data, lsd_data)
     save_or_show(fig, args.output_file)
