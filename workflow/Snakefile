@@ -80,7 +80,7 @@ definitions = [
     "spectrum_observations",
     "lightest_infinite_volume_S_tm",
 ]
-data_assets = ["ensemble_data.csv", "Z_A.json"]
+data_assets = ["ensemble_data.csv", "Z_A.json", "finite_volume_fit.json"]
 
 rule all:
     input:

@@ -140,7 +140,7 @@ rule finite_volume_fit:
         ],
         script="s_parameter/time_moment/finite_volume_fit.py",
     output:
-        data="processed_data/finite_volume_fit.json",
+        data="data_assets/finite_volume_fit.json",
     conda:
         "../envs/python.yml"
     shell:
