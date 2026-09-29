@@ -137,7 +137,7 @@ rule ensemble_csv:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        previous_data="previous_data/spectrum_2505.08658.csv",
+        previous_data=config["spectrum_file"],
         data=[
             rule.output.data.format(**row, kind="renormalised")
             for rule in [rules.S_parameter_tm_fit, rules.pade_fit_systematics, rules.compute_sum_rules, rules.Z_A]
