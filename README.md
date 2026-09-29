@@ -76,7 +76,7 @@ Intermediary data are placed in the `intermediary_data` directory.
 This workflow is relatively tailored to the data
 which it was originally written to analyse.
 Additional ensembles may be added to the analysis
-by adding relevant files to the `raw_data` directory,
+by adding relevant files to the `data` directory,
 and adding corresponding entries to the files in the `metadata` directory.
 However,
 extending the analysis in this way
