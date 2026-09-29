@@ -2,7 +2,7 @@
 
 ## Analysis workflow
 
-[![DOI](https://zenodo.org/badge/DOI/TODO DOI.svg)](https://doi.org/TODO DOI)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21297277.svg)](https://doi.org/10.5281/zenodo.21297277)
 
 The workflow in this repository performs
 the analyses presented in the paper
@@ -27,12 +27,10 @@ in $N_f = 8$ QCD][paper].
    cd latkmi_s_parameter_2026
    ```
 
-3. TODO Add instructions on which files to download from data release,
-   and where to place them.
-
-``` shellsession
-zenodo_get --doi 10.5281/zenodo.17037868 --glob spectrum.csv --output-dir previous_data
-```
+3. From the [data release][datarelease],
+   download the files `data.zip` and `ensembles.csv`.
+   Unzip the former in the repository root to create the `data/` directory,
+   and place the latter in the `metadata` directory.
 
 ## Running the workflow
 
@@ -51,11 +49,18 @@ all required Python packages.
 This requires an Internet connection;
 if you are running in an HPC environment where you would need
 to run the workflow without Internet access,
-details on how to preinstall the environment
-can be found in the [Snakemake documentation][snakemake-conda].
+you can use the commands:
 
-TODO Add estimate of how long the analysis takes end-to-end,
-and on what hardware.
+``` shellsession
+snakemake --conda-create-envs-only
+snakemake previous_data/spectrum_2505.08658.csv previous_data/fit_results_2505.08658.csv
+```
+
+The former command prepares the Conda environments,
+while the latter downloads data from our previous work that this analysis relies upon.
+
+The workflow takes around three hours to run
+using six cores of an Apple M1 CPU.
 
 ## Output
 
@@ -78,9 +83,9 @@ extending the analysis in this way
 has not been as fully tested as the rest of the workflow,
 and is not guaranteed to be trivial for someone not already familiar with the code.
 
-[datarelease]: https://doi.org/10.5281/zenodo.TODO_ZENODO_ID
+[datarelease]: https://doi.org/10.5281/zenodo.21693826
 [miniforge]: https://github.com/conda-forge/miniforge
-[paper]: https://doi.org/10.48550/arXiv.TODO_ARXIV_ID
+[paper]: https://doi.org/10.48550/arXiv.2609.35371
 [snakemake]: https://snakemake.github.io
 [snakemake-conda]: https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 [texlive]: https://tug.org/texlive/
