@@ -1,3 +1,29 @@
+rule get_previous_fit_results:
+    output:
+        data="previous_data/fit_results_2505.08658.csv",
+    conda:
+        "../envs/zenodo_get.yml"
+    shadow: "minimal"
+    shell:
+        """
+        zenodo_get --doi https://doi.org/10.5281/zenodo.17037868 --glob fit_results.csv
+        mv fit_results.csv {output.data}
+        """
+
+
+rule get_previous_spectrum:
+    output:
+        data="previous_data/spectrum_2505.08658.csv",
+    conda:
+        "../envs/zenodo_get.yml"
+    shadow: "minimal"
+    shell:
+        """
+        zenodo_get --doi https://doi.org/10.5281/zenodo.17037868 --glob spectrum.csv
+        mv spectrum.csv {output.data}
+        """
+
+
 rule plot_tm_vp:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
@@ -208,7 +234,7 @@ rule S_parameter_group_by_mass:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         S_data=rules.plot_S_parameter.input.data,
-        spectrum_data="previous_data/spectrum.csv",
+        spectrum_data="previous_data/spectrum_2505.08658.csv",
         script="s_parameter/comparison/plot_S_all_ensembles.py",
         plot_styles=config["plot_styles"],
     output:
@@ -227,7 +253,7 @@ rule S_parameter_group_by_volume:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         S_data=rules.plot_S_parameter.input.data,
-        spectrum_data="previous_data/spectrum.csv",
+        spectrum_data="previous_data/spectrum_2505.08658.csv",
         script="s_parameter/comparison/plot_S_all_ensembles.py",
         plot_styles=config["plot_styles"],
         lsd_data="external_data/lsd_prd14_spectra_sparameter_table_6.csv",
@@ -342,19 +368,6 @@ rule compute_lsd_infinite_volume:
         "--s_parameter_data {input.lsd_s_data} --chiral_data {input.lsd_chiral_data} "
         "--fit_result {input.fit_result} "
         "--output_file {output.data}"
-
-
-rule get_previous_fit_results:
-    output:
-        data="previous_data/fit_results_2505.08658.csv",
-    conda:
-        "../envs/zenodo_get.yml"
-    shadow: "minimal"
-    shell:
-        """
-        zenodo_get --doi https://doi.org/10.5281/zenodo.17037868 --glob fit_results.csv
-        mv fit_results.csv {output.data}
-        """
 
 
 rule plot_lsd_infinite_volume:
