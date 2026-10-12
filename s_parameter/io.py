@@ -4,9 +4,8 @@
 Tools for getting data in and out of files.
 """
 
-import ujson as json
-
 import numpy as np
+import ujson as json
 
 
 def _serialise_value(value):

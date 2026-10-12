@@ -6,11 +6,10 @@ from functools import cache
 import numba
 import numpy as np
 import pandas as pd
-from scipy.integrate import quad_vec, nsum
+from scipy.integrate import nsum, quad_vec
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import generate_jackknife, jackknife_mean_error
-
 
 METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 

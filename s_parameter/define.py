@@ -6,7 +6,6 @@ import re
 from format_multiple_errors import format_multiple_errors
 from uncertainties import UFloat
 
-
 substitutions = {
     "Nf12": "NfTwelve",
     "10": "Ten",
@@ -28,8 +27,7 @@ substitutions = {
 
 def get_filename(file_obj):
     filename = pathlib.Path(file_obj.name).name
-    if filename.endswith(".tex"):
-        filename = filename[:-4]
+    filename = filename.removesuffix(".tex")
     return filename
 
 

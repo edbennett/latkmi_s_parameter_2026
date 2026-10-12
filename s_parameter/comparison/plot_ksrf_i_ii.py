@@ -2,7 +2,7 @@
 
 import matplotlib.pyplot as plt
 
-from ..plot import comparison_plot_main, plot_new_series, iterate_lengths
+from ..plot import comparison_plot_main, iterate_lengths, plot_new_series
 
 
 def plot(data):

@@ -6,14 +6,14 @@ from functools import partial
 import numpy as np
 from scipy.optimize import curve_fit
 
-from .sparam_tm import compute_S_parameter_contribution
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import (
     jackknife_mean_error,
     jackknife_statistical_intermediary,
     jackknife_systematic_intermediary,
     sample_systematics,
 )
+from .sparam_tm import compute_S_parameter_contribution
 
 
 def get_args():
