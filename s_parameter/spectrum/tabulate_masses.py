@@ -3,8 +3,8 @@
 from argparse import ArgumentParser, FileType
 from collections import defaultdict
 
-from format_multiple_errors import format_multiple_errors
 import pandas as pd
+from format_multiple_errors import format_multiple_errors
 
 from ..io import read_numpy
 

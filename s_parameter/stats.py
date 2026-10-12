@@ -3,8 +3,8 @@ Tools for binning and jackknife analysis.
 """
 
 import hashlib
-
 from math import prod
+
 import numpy as np
 
 

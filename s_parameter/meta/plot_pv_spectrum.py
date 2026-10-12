@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ..plot import save_or_show, Props
+from ..plot import Props, save_or_show
 
 
 def get_args():

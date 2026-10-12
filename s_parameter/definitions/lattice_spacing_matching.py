@@ -4,9 +4,9 @@ from argparse import ArgumentParser, FileType
 
 import pandas as pd
 
+from ..comparison.plot_infinite_volume_S_lsd import get_rho_mass
 from ..define import define
 from ..stats import add_quadrature
-from ..comparison.plot_infinite_volume_S_lsd import get_rho_mass
 
 
 def get_args():
