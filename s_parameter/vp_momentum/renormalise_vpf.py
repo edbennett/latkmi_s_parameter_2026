@@ -6,10 +6,10 @@ by the renormalisation factor Z_A,
 per e.g. Eq. (5) of the paper.
 """
 
-from argparse import ArgumentParser, FileType
 import json
+from argparse import ArgumentParser, FileType
 
-from ..io import dump_numpy, convert_types
+from ..io import convert_types, dump_numpy
 from ..stats import jackknife_mean_error
 
 

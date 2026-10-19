@@ -6,12 +6,11 @@ from argparse import ArgumentParser
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
 import numpy as np
 import pandas as pd
 
-from .io import read_numpy
 from .comparison import compute_sum_rules
+from .io import read_numpy
 from .stats import add_quadrature
 
 
