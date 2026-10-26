@@ -5,8 +5,7 @@ from argparse import ArgumentParser, FileType
 import numpy as np
 from scipy.optimize import curve_fit
 
-from ..io import read_numpy, dump_numpy
-
+from ..io import dump_numpy, read_numpy
 
 METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 

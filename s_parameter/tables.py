@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy as np
-
 from format_multiple_errors import format_multiple_errors
 
 

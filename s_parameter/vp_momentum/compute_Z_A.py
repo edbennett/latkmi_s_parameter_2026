@@ -5,13 +5,13 @@ Compute the renormalization factor $Z_A$
 following the prescription in Section 2 of the paper.
 """
 
-from argparse import ArgumentParser, FileType
 import json
+from argparse import ArgumentParser, FileType
 
 import numpy as np
 
 from ..io import dump_numpy
-from ..stats import jackknife_mean_error, sample_jackknife_ratio, bin_data
+from ..stats import bin_data, jackknife_mean_error, sample_jackknife_ratio
 
 
 def get_args():

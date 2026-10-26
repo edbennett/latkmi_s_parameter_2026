@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser, FileType
-from compression import zstd
 import json
+from argparse import ArgumentParser, FileType
+
+from compression import zstd
 
 
 def get_args():

@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ..io import read_numpy, collate_ensembles
-from ..plot import iterate_attribute, save_or_show, Props
+from ..io import collate_ensembles, read_numpy
+from ..plot import Props, iterate_attribute, save_or_show
 
 
 def get_args():
