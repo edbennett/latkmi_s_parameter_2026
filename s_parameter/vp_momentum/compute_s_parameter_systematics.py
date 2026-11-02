@@ -4,7 +4,7 @@ from argparse import ArgumentParser, FileType
 
 import numpy as np
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 
 
 def get_args():

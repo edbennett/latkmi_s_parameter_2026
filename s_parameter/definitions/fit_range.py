@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser, FileType
 
-
 from ..define import define_many
 
 

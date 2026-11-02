@@ -4,7 +4,7 @@ from argparse import ArgumentParser, FileType
 
 import pandas as pd
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import generate_jackknife
 
 

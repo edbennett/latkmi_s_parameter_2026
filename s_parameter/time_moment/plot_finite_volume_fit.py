@@ -5,8 +5,8 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 
 from ..io import read_numpy
-from ..plot import iterate_attribute, save_or_show, Props
-from ..stats import jackknife_mean_error, add_quadrature
+from ..plot import Props, iterate_attribute, save_or_show
+from ..stats import add_quadrature, jackknife_mean_error
 
 
 def get_args():
