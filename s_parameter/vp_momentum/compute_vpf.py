@@ -5,16 +5,16 @@ Compute the vacuum polarisation function $\Pi^{V-A}(q^2)$
 following the prescription in Section 2 of the paper.
 """
 
-from argparse import ArgumentParser, FileType
-from compression import zstd
-from functools import partial
 import itertools
 import json
+from argparse import ArgumentParser, FileType
+from functools import partial
 
 import numpy as np
+from compression import zstd
 
-from ..io import dump_numpy, convert_types
-from ..stats import jackknife_mean_error, sample_jackknife, bin_data
+from ..io import convert_types, dump_numpy
+from ..stats import bin_data, jackknife_mean_error, sample_jackknife
 
 
 def get_args():
