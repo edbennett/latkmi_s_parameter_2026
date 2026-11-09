@@ -7,9 +7,8 @@ from multiprocessing import Pool
 import pandas as pd
 
 from ..io import read_numpy
-from ..stats import generate_jackknife, jackknife_mean_error, add_quadrature
+from ..stats import add_quadrature, generate_jackknife, jackknife_mean_error
 from ..time_moment.finite_volume import delta_fv_S
-
 
 JACKKNIFE_SAMPLE_SIZE = 50
 

@@ -4,8 +4,8 @@
 Fit Z_A as a function of fermion mass using linear and quadratic Ansätze
 """
 
-from argparse import ArgumentParser, FileType
 import json
+from argparse import ArgumentParser, FileType
 
 import numpy as np
 from scipy.optimize import curve_fit

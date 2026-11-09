@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser, FileType
 
-
 from ..io import read_numpy
 from ..tables import formatter
 
