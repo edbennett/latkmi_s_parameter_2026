@@ -5,7 +5,7 @@ from argparse import ArgumentParser, FileType
 import numpy as np
 from scipy.special import gamma
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import jackknife_mean_error
 
 

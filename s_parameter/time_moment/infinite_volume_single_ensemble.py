@@ -2,9 +2,8 @@
 
 from argparse import ArgumentParser, FileType
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import generate_jackknife, jackknife_mean_error
-
 
 METADATA_KEYS = ["mass", "Nt", "Nx", "Ny", "Nz", "Nf", "bin_size"]
 

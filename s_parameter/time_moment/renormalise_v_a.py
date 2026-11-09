@@ -5,13 +5,13 @@ Multiply the vector and axial correlation functions
 by appropriate factors of the renormalisation factor Z_A.
 """
 
-from argparse import ArgumentParser, FileType
 import json
+from argparse import ArgumentParser, FileType
 
 import numpy as np
 
-from ..io import dump_numpy, convert_types
-from ..stats import jackknife_mean_error, bin_data, sample_jackknife
+from ..io import convert_types, dump_numpy
+from ..stats import bin_data, jackknife_mean_error, sample_jackknife
 
 
 def get_args():
