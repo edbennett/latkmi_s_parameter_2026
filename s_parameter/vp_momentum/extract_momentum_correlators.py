@@ -4,12 +4,13 @@
 Extract momentum correlators and PBP from a full log.
 """
 
-from argparse import ArgumentParser
-from compression import zstd
-from collections import defaultdict
-import re
 import json
+import re
 import sys
+from argparse import ArgumentParser
+from collections import defaultdict
+
+from compression import zstd
 
 
 def get_args():

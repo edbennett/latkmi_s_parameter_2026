@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser, FileType
 import logging
+from argparse import ArgumentParser, FileType
 
 import numpy as np
 import pandas as pd
 
-from ..io import read_numpy, dump_numpy
-from ..stats import jackknife_mean_error, generate_jackknife
-
+from ..io import dump_numpy, read_numpy
+from ..stats import generate_jackknife, jackknife_mean_error
 
 METADATA_KEYS = ["mass", "Nf", "Nt", "Nx", "Ny", "Nz", "bin_size"]
 

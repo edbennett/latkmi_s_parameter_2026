@@ -7,8 +7,7 @@ import numpy as np
 
 from ..io import read_numpy, read_numpy_optional
 from ..plot import save_or_show
-from .pade import pade, get_momentum_filter
-
+from .pade import get_momentum_filter, pade
 
 colours = {"Conserved": "C0", "OneLink": "C1"}
 

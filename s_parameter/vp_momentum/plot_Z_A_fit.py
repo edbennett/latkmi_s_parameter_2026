@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
 import json
+from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import numpy as np

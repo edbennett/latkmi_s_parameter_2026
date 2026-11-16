@@ -6,15 +6,15 @@ via the Ansatz f(q^2) = (b0 + b1 q^2)/(1 + c1 q^2 + c2 q^4);
 see Eq. (9) of the paper.
 """
 
-from argparse import ArgumentParser, FileType
 import json
+from argparse import ArgumentParser, FileType
 
 import numpy as np
 from scipy.optimize import curve_fit
 
-from ..io import dump_numpy, convert_types
-from .pade import pade, get_momentum_filter
+from ..io import convert_types, dump_numpy
 from ..stats import jackknife_mean_error
+from .pade import get_momentum_filter, pade
 
 
 def get_args():

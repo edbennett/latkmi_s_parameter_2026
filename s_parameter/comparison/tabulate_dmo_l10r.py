@@ -2,12 +2,12 @@
 
 from argparse import ArgumentParser, FileType
 
-from format_multiple_errors import format_multiple_errors
 import numpy as np
+from format_multiple_errors import format_multiple_errors
 
+from ..io import read_numpy
 from .compute_sum_rules import get_systematic
 from .tabulate_sum_rules import get_with_attribute
-from ..io import read_numpy
 
 
 def get_args():

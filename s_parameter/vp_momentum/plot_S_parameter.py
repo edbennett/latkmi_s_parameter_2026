@@ -5,9 +5,8 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..plot import save_or_show
 from ..io import read_numpy
-
+from ..plot import save_or_show
 
 colours_markers = {
     18: ("C5", "p"),

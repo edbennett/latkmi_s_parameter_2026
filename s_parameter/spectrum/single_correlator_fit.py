@@ -7,7 +7,7 @@ from itertools import product
 import numpy as np
 from scipy.optimize import curve_fit
 
-from ..io import read_numpy, dump_numpy
+from ..io import dump_numpy, read_numpy
 from ..stats import (
     jackknife_mean_error,
     jackknife_statistical_intermediary,

@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from ..plot import comparison_plot_main, iterate_lengths, plot_new_series, add_qcd_value
+from ..plot import add_qcd_value, comparison_plot_main, iterate_lengths, plot_new_series
 from ..stats import product_error_contribution
 
 
