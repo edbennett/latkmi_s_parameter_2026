@@ -7,7 +7,6 @@ import pandas as pd
 
 from ..io import read_numpy
 
-
 SOURCE = "10.5281/zenodo.21297277"
 MATCH_KEYS = ["Nf", "Nx", "Ny", "Nz", "Nt", "mass"]
 
@@ -155,8 +154,7 @@ def sort_key(element):
             # Trim out the trailing underscore
             observable = element[len(prefix) + 1 :]
             return (observable, prefix_idx)
-    else:
-        return ("", 0)
+    return ("", 0)
 
 
 def main():
